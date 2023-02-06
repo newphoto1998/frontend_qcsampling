@@ -145,13 +145,13 @@
               </tbody>
             </table>
           </div>
+      
             <section class="example-section" >
               <h2>RESULT </h2>
               <h1><mat-checkbox [checked]="ischeck" formControlName="ok" (change)="toggle('OK')" value="OK">OK</mat-checkbox></h1>
               <h1><mat-checkbox [checked]="ischeck2" formControlName="ng" (change)="toggle('NG')" value="NG">NG</mat-checkbox></h1>
               
             </section>
-
             <div [hidden]="isHidden">
               <mat-form-field  appearance="outline" [style.width.%]='20' [style.height.%]='20'>
                 <mat-label>QTY</mat-label>

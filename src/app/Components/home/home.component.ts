@@ -2,7 +2,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, Observable, retry, startWith } from 'rxjs';
+import { map, Observable, of, retry, startWith } from 'rxjs';
 import { DatePipe } from '@angular/common'
 import { SrvQcsamplingService } from 'src/app/Middleware/Services/srv-qcsampling.service';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
@@ -66,6 +66,7 @@ keyboardInput !: string;
 labelPosition: 'before' | 'after' = 'after';
 date !: Date
 latest_date !: string
+aftercheck_status !: boolean;
 
 ///form controls for selector
 
@@ -90,7 +91,7 @@ ngOnInit(): void {
       cm: ['',Validators.required],
       desc: ['',Validators.required],
       hold_qty : [0],
-      ok: [true],
+      ok: [false],
       ng: [false]
     });
 
@@ -108,6 +109,7 @@ toggle(status:string) {
     this.ischeck = true;
     this.ischeck2 = false;
     this.isHidden = true;
+    this.frmQCsampling.controls['hold_qty'].setValue('0');
   }
 
   if(status == "NG"){
@@ -131,12 +133,12 @@ onBlurMethod(){
 
 inputBarcode(data:string){
   this.keyboardInput = data
-    
+
+
   //load data in text form
     this.route.queryParams.subscribe((param: any) => {
       this.keyboardInput = data;
       this.SrvQcsamplingService.getQrcodeData(this.keyboardInput).subscribe((res: BarcodeDataInfoModule[]) => {
-        console.log(res)
          if(res){
 
           this.frmBarcode.setValue({ barcode: '' });
@@ -146,13 +148,13 @@ inputBarcode(data:string){
                                         wcno: res[0].wcno, partno: res[0].part_no, 
                                         model: res[0].part_model, cm: res[0].cm, 
                                         desc: res[0].description,
-                                        hold_qty : 0, ok: true,ng: false
+                                        hold_qty : 0, ok: false,ng: false
                                       });
                                    
                                       this.wcno = res[0].wcno
                                       this.partno = res[0].part_no
                                       this.model = res[0].part_model
-                                      this.cm = res[0].cm
+                                      this.cm = res[0].cm                                   
                                       this.payload = {
       
                                         wcno : this.wcno,
@@ -160,14 +162,13 @@ inputBarcode(data:string){
                                         model : this.model,
                                         cm : this.cm,
                                         shift : this.shift,
-                                        pddate : this.latest_date,
+                                        pddate : this.latest_date,                                
                                         
                                       }
         
             this.route.queryParams.subscribe((param: any) => {
             this.SrvQcsamplingService.getSamplingDataTable(this.latest_date,this.shift,this.wcno,
             this.partno,this.cm,this.model).subscribe((dt: QcsamplingDataTable[]) => {
-              console.log(dt)
                 if(res){
 
                     this.dataSource = dt
@@ -187,8 +188,7 @@ inputBarcode(data:string){
   });
 
 
-
-    this.wcnof.nativeElement.focus();
+    //this.wcnof.nativeElement.focus();
 }
 
 reloadData(){
@@ -205,7 +205,11 @@ reloadData(){
 
     });
 
-});  
+});
+ this.frmQCsampling.controls['ok'].setValue(false)
+ this.frmQCsampling.controls['ng'].setValue(false)
+ this.frmQCsampling.controls['hold_qty'].setValue('0');
+
 }
 
 clear(){
@@ -214,20 +218,25 @@ clear(){
 
 
 onSubmit(values: any, formDirective: FormGroupDirective)  {
-
-  if(this.frmQCsampling.valid) {
+  console.log(values.ok + '||' + values.ng)
+  if((this.frmQCsampling.valid) && (values.ok || values.ng)) {
     this.SrvQcsamplingService.saveQCsamplingData(values,this.latest_date,this.shift).subscribe((res: any) => {
-      console.log(res);
       if (res == 'OK') {
-        this.openDialog(true);
-
-      }else{
-        this.openDialogWarning(false)
-      } 
+          // if(values.ok)
+          //   this.aftercheck_status = values.ok
+          // else if(values.ng)
+          //   this.aftercheck_status = !values.ok
+          this.openDialog(true);
+         
+    }
 
     })
-    
   }
+  else{
+    this.openDialogWarning()
+  }
+    
+
   this.barcode.nativeElement.focus();
 
 }
@@ -251,11 +260,19 @@ openDialog(status: boolean) {
       timer: 1500
     }).then(()=>this.reloadData());
     this.isHidden = true;
+    // if(this.aftercheck_status){
+    //   this.isHidden = false
+    //   alert('false' + this.aftercheck_status)
+    // } 
+    // else{
+    //   this.isHidden = true
+    //   alert('true' + this.aftercheck_status)
+    // } 
 
   } else {
     Swal.fire({
       position: 'center',
-      icon: 'error',
+      icon: 'success',
       title: 'ล้างข้อมูลสำเร็จ',
       showConfirmButton: false,
       timer: 1500
@@ -269,29 +286,29 @@ openDialog(status: boolean) {
 }
 
 
-openDialogWarning(status: boolean) {
-  if (status) {
+openDialogWarning() {
+  // if (status) {
+  //   Swal.fire({
+  //     position: 'center',
+  //     icon: 'success',
+  //     title: 'บันทึกสำเร็จ',
+  //     showConfirmButton: false,
+  //     timer: 1500
+  //   });
+  //   this.isHidden = true;
+
+  // } else {
     Swal.fire({
       position: 'center',
-      icon: 'success',
-      title: 'บันทึกสำเร็จ',
+      icon: 'error',
+      title: 'บันทึกไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง',
       showConfirmButton: false,
       timer: 1500
     });
     this.isHidden = true;
 
-  } else {
-    Swal.fire({
-      position: 'center',
-      icon: 'error',
-      title: 'บันทึกไม่สำเร็จ',
-      showConfirmButton: false,
-      timer: 1500
-    });
-    this.isHidden = false;
-
-
-  }
+  
+  
 
 
 }
@@ -324,7 +341,8 @@ Clear(){
 
     this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
     this.frmQCsampling.reset();
-    console.log(this.dataSource)
+    this.barcode.nativeElement.focus();
+
  
 }
 
