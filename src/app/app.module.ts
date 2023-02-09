@@ -5,20 +5,35 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './Template/header/header.component';
 import { FooterComponent } from './Template/footer/footer.component';
 import { HomeComponent } from './Components/home/home.component';
-import { MatAutocompleteModule, MatButtonModule, MatCheckboxModule, MatDatepickerModule, 
-  MatFormFieldModule, MatInputModule, MatRadioModule, MatSelectModule, MatSliderModule,MatCardModule,
-  MatSlideToggleModule,MatIconModule } from '@angular/material';
+
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatDialogModule} from "@angular/material/dialog";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatGridListModule} from '@angular/material/grid-list';
 import { HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common'
-import { MatTableModule } from '@angular/material/table';
+/*import { MatTableModule } from '@angular/material/table';*/
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { CdkTableModule } from '@angular/cdk/table';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
+// import { MatAutocompleteModule, MatButtonModule, MatCheckboxModule, MatDatepickerModule, 
+//   MatFormFieldModule, MatInputModule, MatRadioModule, MatSelectModule, MatSliderModule,MatCardModule,
+//   MatSlideToggleModule,MatIconModule } from '@angular/material';
+
+  import { MatAutocompleteModule} from '@angular/material/autocomplete';
+  import { MatButtonModule} from '@angular/material/button'
+  import { MatCheckboxModule} from '@angular/material/checkbox'
+  import { MatFormFieldModule } from '@angular/material/form-field'
+  import { MatInputModule } from '@angular/material/input'
+  import { MatSelectModule } from '@angular/material/select'
+  import { MatCardModule } from '@angular/material/card'
+  import { MatIconModule } from '@angular/material/icon'
+//  import { MatDatepickerModule,MatNativeDateModule } from '@angular/material/datepicker'
+  import { MatDatepickerModule } from '@angular/material/datepicker';
+  import { MatNativeDateModule } from '@angular/material/core';
+
+
+  
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,8 +42,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     HomeComponent
   ],
   imports: [
-    CdkTableModule,
-    MatTableModule,
     MatPaginatorModule,
     HttpClientModule,
     MatGridListModule,
@@ -42,18 +55,19 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     MatDatepickerModule, 
     MatFormFieldModule, 
     MatInputModule, 
-    MatRadioModule, 
+    //MatRadioModule, 
     MatSelectModule, 
-    MatSliderModule,
-    MatSlideToggleModule,
+    //MatSliderModule,
+    //MatSlideToggleModule,
+    MatNativeDateModule,
     MatIconModule ,
     FormsModule,
     ReactiveFormsModule,
     MatDialogModule,
     NgbModule
   ],
-  providers: [DatePipe],
+  providers: [DatePipe ],
   bootstrap: [AppComponent],
-  exports:[MatTableModule]
+  
 })
 export class AppModule {}

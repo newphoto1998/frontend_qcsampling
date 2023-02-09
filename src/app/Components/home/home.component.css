@@ -5,11 +5,16 @@ h1 {
   }
   .example-card {
     width: 100%;
-    margin: 10px;
+    /* margin-top: 10px; */
   }
     
   mat-card-subtitle {
     font-size: 18px;
+   
+  }
+
+  .example-form-field {
+    margin: 0 8px 16px 0;
   }
     
   mat-card-title {
@@ -19,8 +24,13 @@ h1 {
     display: flex;
   }
 
+  .mat-card-actions, .mat-card-content, .mat-card-subtitle {
+    display: block;
+    margin-top: -30px;
+}
+
   .example-section {
-    margin: 20px 0;
+    margin: 10px 0;
     
   }
 
@@ -45,32 +55,52 @@ h1 {
 }
 
 ::ng-deep .mat-form-field {
-  font-size: 18px; 
+  font-size: 13px; 
   font-weight: bold;
 }
-/* 
-.example-container mat-form-field + mat-form-field  {
-    margin-left: 8px;
-    
-  } */
+
+::ng-deep .mat-form-field-appearance-outline.date-input-focus .mat-form-field-outline  {
+  background-color: #faffb3!important;
+  border-radius: 5px; 
+
+
+}
+
+::ng-deep .mat-form-field-appearance-outline.shift-input-focus .mat-form-field-outline  {
+  background-color: #faffb3!important;
+  border-radius: 5px; 
+  width: 80px;
+
+
+}
+
+
+
 
 ::ng-deep .mat-form-field-appearance-outline.barcode-input-focus .mat-form-field-outline  {
-    background-color: greenyellow !important;
+    background-color: #faffb3!important;
     border-radius: 5px; 
 
 
 }
 
-
 ::ng-deep .mat-form-field-appearance-outline.barcode-input-blur .mat-form-field-outline  {
-  background-color: red !important;
-  border-radius: 5px;
+  background-color:  #ff8484 !important;
+  border-radius: 5px; 
+
 
 }
 
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline  {
-  background-color: cyan !important;
+  background-color: #faffb3!important;
+  border-radius: 5px; 
+
+
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline  {
+  background-color:  #ff8484 !important;
   border-radius: 5px; 
 
 
@@ -84,13 +114,16 @@ h1 {
 
 
 
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline  {
+  background-color:  #c1ffff !important;
+  border-radius: 5px; 
 
 
-.content {
-  width: 100%;
-  height: 100%;
-  margin: -2rem
 }
+.example-form-field {
+  margin: 0 0px 0px 0;
+}
+
 
 .d-md-flex {
   display: flex !important;
@@ -111,21 +144,10 @@ h1 {
 }
 
 .title-table {
-  font-size: 20px;
+  font-size: 5px;
   font-weight: bold;
   margin-top: 1rem;
   margin-bottom: 1rem;
-}
-
-.filter-content {
-  height: auto;
-  margin-top: 3rem;
-  margin-bottom: 2rem;
-  border-radius: 10px;
-  padding: 2rem;
-  box-shadow: 5px 0 10px rgb(179, 177, 177);
-  display: flex;
-  flex-direction: column;
 }
 
 .filter {
@@ -143,12 +165,6 @@ h1 {
 .mat-cell,
 .mat-footer-cell {
   padding: 0.75rem;
-}
-
-.title {
-  font-size: 40px;
-  font-weight: bold;
-  margin-top: 15px;
 }
 
 

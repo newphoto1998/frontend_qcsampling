@@ -34,10 +34,10 @@ export class SrvQcsamplingService {
 
 
 
-getSamplingDataTable(date:string,shift:string,wcno:any,partno:any,cm:any,model:any){
+getSamplingDataTable(date:string,shift:string,wcno:string,partno:string,model:string){
 
   return this.http
-  .get<QcsamplingDataTable[]>(`${this.config.server_api}/api/QCSampling/getSamplingDataTable/${date}/${shift}/${wcno}/${partno}/${cm}/${model}`, {
+  .get<QcsamplingDataTable[]>(`${this.config.server_api}/api/QCSampling/getSamplingDataTable/${date}/${shift}/${wcno}/${partno}/${model}`, {
     responseType: 'json',
     observe: 'response',
   })
@@ -54,9 +54,9 @@ getSamplingDataTable(date:string,shift:string,wcno:any,partno:any,cm:any,model:a
 
 
 
-  saveQCsamplingData(payload:any,date:string,shift:string){
+  saveQCsamplingData(payload:any){
   
-    return this.http.post(this.config.server_api + `/api/QCSampling/SaveQCsamplingData/${date}/${shift}`, payload);
+    return this.http.post(this.config.server_api + `/api/QCSampling/SaveQCsamplingData`, payload);
 
  }
 }

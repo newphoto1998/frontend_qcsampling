@@ -2,7 +2,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, Observable, of, retry, startWith } from 'rxjs';
 import { DatePipe } from '@angular/common'
 import { SrvQcsamplingService } from 'src/app/Middleware/Services/srv-qcsampling.service';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
@@ -10,30 +9,72 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { QcsamplingDataTable } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTable';
 import Swal from 'sweetalert2';
-// import { MatTableDataSource } from '@angular/material/table';
-import { MatTableModule} from '@angular/material/table'
-import { MatTableDataSource} from '@angular/material/table'
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import * as _moment from 'moment';
+// tslint:disable-next-line:no-duplicate-imports
+
+
+const moment = _moment;
+
+export const MY_FORMATS = {
+  parse: {
+    dateInput: 'LL',
+  },
+  display: {
+    dateInput: 'DD/MM/yyyy',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
+  providers: [
+
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+    },
+
+    {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS},
+  ],
 })
 
 export class HomeComponent implements OnInit {
+  _date = moment();
+  date_format !: string;
+
+
+ 
+  // myFilter = (d: Date | null): boolean => {
+    
+ 
+  //   const now_month =(d || new Date()).getMonth();
+  //   const year = new Date().getFullYear();
+  //   const month = new Date().getMonth()  
+  //   return (now_month === month);
+
+  // };
   @ViewChild('wcnof')
   wcnof!: ElementRef;
   @ViewChild('barcode')
   barcode!: ElementRef;
-  @ViewChild(MatSort, { static: true }) sort!: MatSort;
-  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+  @ViewChild('shift') teams!: ElementRef;
+
+
   constructor( private formBulid: FormBuilder,
     private SrvQcsamplingService: SrvQcsamplingService, private router: Router ,
     private route:ActivatedRoute,
-    public datepipe: DatePipe ) { }
+    public datepipe: DatePipe) { }
 
     displayedColumns = [
       'Sampling',
@@ -43,13 +84,12 @@ export class HomeComponent implements OnInit {
     ];
 payload !:any
 dataSource: QcsamplingDataTable[] = [];
-//dataSource = new MatTableDataSource<QCsamplingModule>();
 frmQCsampling!: FormGroup;
 frmBarcode!:FormGroup;
 ischeck !: boolean;
 ischeck2 !: boolean;
 isSimulator = false;
-
+isPicker = true;
 isHidden = true;
 ymd !: string;
 shift !:string;
@@ -63,32 +103,40 @@ isChange : boolean = false;
 isBlur :boolean = false
 searchValue :any = "";
 keyboardInput !: string;
-labelPosition: 'before' | 'after' = 'after';
 date !: Date
-latest_date !: string
+//latest_date !: string
 aftercheck_status !: boolean;
+selected !: string
+minDate !: Date
+maxDate !: Date
 
-///form controls for selector
 
 
 ngOnInit(): void {
+
+    this._date = moment();
+    this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
+
+
+
+
     this.date = new Date();  
-    
+    this.minDate = new Date(this.date.getFullYear(),this.date.getMonth(),1)
+    this.maxDate = new Date(this.date.getFullYear(),this.date.getMonth(),this.date.getDate())
     if(this.date.getHours() >= 8 && this.date.getHours() <= 20){
-        this.shift = "D"
+       this.selected = this.shift = "D"
       }else{
-        this.shift = "N"
+        this.selected = this.shift = "N"
       }
-
-      this.latest_date  = this.datepipe.transform(this.date, 'yyyy-MM-dd') || '';
-
 
     this.isFocus = !this.isFocus;
     this.frmQCsampling = this.formBulid.group({
+      _pddate:[moment(),Validators.required],
+      _shift:[this.selected,Validators.required],
       wcno:['',Validators.required],
       partno:['',Validators.required],
       model:['',Validators.required],
-      cm: ['',Validators.required],
+      cm: [''],
       desc: ['',Validators.required],
       hold_qty : [0],
       ok: [false],
@@ -101,8 +149,19 @@ ngOnInit(): void {
 
 }
 
+changeClient(vale:string){
+  this.shift = vale
+}
+
+addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
+  this._date = moment(event.value);
+  this.date_format = this._date.format('DD') + '-' + this._date.format('MM') + '-' + this._date.format('yyyy')
+
+
+}
 
 toggle(status:string) {
+  
 
 
   if(status == "OK"){
@@ -144,31 +203,33 @@ inputBarcode(data:string){
           this.frmBarcode.setValue({ barcode: '' });
 
 
-          this.frmQCsampling.setValue({ 
+          this.frmQCsampling.setValue({ _pddate:moment(), _shift:this.shift,
                                         wcno: res[0].wcno, partno: res[0].part_no, 
                                         model: res[0].part_model, cm: res[0].cm, 
                                         desc: res[0].description,
                                         hold_qty : 0, ok: false,ng: false
                                       });
-                                   
+                                      
+                                      
                                       this.wcno = res[0].wcno
                                       this.partno = res[0].part_no
                                       this.model = res[0].part_model
                                       this.cm = res[0].cm                                   
-                                      this.payload = {
-      
-                                        wcno : this.wcno,
-                                        partno : this.partno,
-                                        model : this.model,
-                                        cm : this.cm,
-                                        shift : this.shift,
-                                        pddate : this.latest_date,                                
-                                        
+                                      
+                                      var payload = {
+                                        wcno:this.wcno ,
+                                        partno:this.partno,
+                                        cm:this.cm,
+                                        model:this.model,
+                                        shift:this.shift,
+                                        pddate:this.date_format,
+                                        judgementResult :"",
+                                        judgementQty :0
                                       }
-        
+                                        
             this.route.queryParams.subscribe((param: any) => {
-            this.SrvQcsamplingService.getSamplingDataTable(this.latest_date,this.shift,this.wcno,
-            this.partno,this.cm,this.model).subscribe((dt: QcsamplingDataTable[]) => {
+            this.SrvQcsamplingService.getSamplingDataTable(this.date_format,this.shift,this.wcno,
+            this.partno + '_' + this.cm ,this.model).subscribe((dt: QcsamplingDataTable[]) => {
                 if(res){
 
                     this.dataSource = dt
@@ -193,8 +254,8 @@ inputBarcode(data:string){
 
 reloadData(){
   this.route.queryParams.subscribe((param: any) => {
-    this.SrvQcsamplingService.getSamplingDataTable(this.latest_date,this.shift,this.wcno,
-    this.partno,this.cm,this.model).subscribe((dt: QcsamplingDataTable[]) => {
+    this.SrvQcsamplingService.getSamplingDataTable(this.date_format,this.shift,this.wcno,
+    this.partno + '_' + this.cm,this.model).subscribe((dt: QcsamplingDataTable[]) => {
   
         if(dt){
 
@@ -218,17 +279,12 @@ clear(){
 
 
 onSubmit(values: any, formDirective: FormGroupDirective)  {
-  console.log(values.ok + '||' + values.ng)
+  console.log(values)
   if((this.frmQCsampling.valid) && (values.ok || values.ng)) {
-    this.SrvQcsamplingService.saveQCsamplingData(values,this.latest_date,this.shift).subscribe((res: any) => {
+    this.SrvQcsamplingService.saveQCsamplingData(values).subscribe((res: any) => {
       if (res == 'OK') {
-          // if(values.ok)
-          //   this.aftercheck_status = values.ok
-          // else if(values.ng)
-          //   this.aftercheck_status = !values.ok
           this.openDialog(true);
-         
-    }
+      }
 
     })
   }
@@ -341,14 +397,11 @@ Clear(){
 
     this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
     this.frmQCsampling.reset();
+    this.frmQCsampling.setValue({ _pddate:moment(), _shift:this.shift})
     this.barcode.nativeElement.focus();
 
  
 }
-
-// onClickCancel() {
-//   this.frmQCsampling.reset();
-
 //   //this.router.navigate(['/', 'course']);
 // }
 // openDialog(status: boolean) {
