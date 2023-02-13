@@ -1,0 +1,81 @@
+
+<!-- <div class="back">
+
+
+    <div class="div-center">
+  
+  
+      <div class="content">
+        <mat-card class="card shadow-lg">
+          <form class="menu-login d-flex flex-column text-uppercase" #form="ngForm" [formGroup]="loginForm" (submit)="ClickSubmit()">
+            <div class="d-flex flex-row align-items-center ms-2">
+              <img class="logo rounded-circle zoom" src="https://www.dci.co.th/images/daikin-squarelogo.png" alt="" />
+              <span>DCI </span>
+            </div>
+
+            <mat-form-field class="example-full-width mt-3" appearance="outline">
+              <mat-label>รหัสพนักงาน</mat-label>
+              <input type="text" #user formControlName="user" maxlength="5" minlength="5"
+                tabindex="1" matInput (keypress)="EventEnter($event)" autofocus />
+
+  
+            </mat-form-field>
+  
+            <div class="d-flex flex-row">
+              <button type="button" (click)="ClickSubmit()" mat-raised-button
+                class="bg-success text-white w-50 justify-content-end h-100">
+                <span class="material-icons-outlined"></span> Login
+              </button>
+            </div>
+  
+          </form>
+  
+        </mat-card>
+      </div>
+    </div>
+  </div> -->
+
+  <div class="main-div mt-100">
+  
+  <mat-card class="example-card shadow-lg">
+  <div class="m-3">
+      <div align = "center">
+          <img src="" alt="">
+      </div>
+    <form class="menu-login d-flex flex-column text-uppercase" #form="ngForm" [formGroup]="loginForm" (submit)="ClickSubmit()">
+        <div class="mb-3">
+          <div class="d-flex flex-row align-items-center ms-2">
+            <img class="logo rounded-circle zoom" src="http://dciweb2.dci.daikin.co.jp/QCSamplingPart/assets/image/daikin-squarelogo.png" alt="" />
+            <span>DCI Login</span>
+          </div>
+          <!-- src="https://www.dci.co.th/images/daikin-squarelogo.png" -->
+          <!-- src="/assets/image/daikin-squarelogo.png" -->
+          <mat-form-field class="example-full-width mt-3" appearance="outline">
+            <mat-label>รหัสพนักงาน</mat-label>
+            <input type="text" #user formControlName="user" maxlength="5" minlength="5"
+              tabindex="1" matInput (keypress)="EventEnter($event)" autofocus />
+
+
+          </mat-form-field>
+
+            <div class="d-flex flex-row">
+              <button type="button" (click)="ClickSubmit()" mat-raised-button
+                class="bg-success text-white w-50 justify-content-end h-100">
+                <span class="material-icons-outlined"></span> Login
+              </button>
+            </div>
+          </div>
+      </form>
+    </div>
+  </mat-card>
+</div>
+
+
+
+
+
+
+
+
+  
+  

@@ -2,8 +2,25 @@
 
 
 <div class="main-div">
-
+  
 <mat-card class="example-card">
+
+  <div class="row head">
+ 
+    
+    <div class="col-8 text-right">
+        <h5 style="font-weight: bold; font-size: 12px;">{{code}} {{name}}</h5>  
+   </div>
+
+     
+  <div class="col-1 ">
+  
+    
+    <button class="logout" mat-raised-button color="warn"  (click)="onClickLogout()">ลงชื่อออก</button>
+  </div>
+</div>
+
+ 
   <mat-card-header>
     <mat-card-title>
   
@@ -13,7 +30,7 @@
           [ngClass]="{'barcode-input-blur': (isBlur == false) , 'barcode-input-focus': isBlur == true}">
           <mat-label>INPUT BARCODE</mat-label>
           <input #barcode formControlName="barcode" matInput type="text" autocomplete="off"
-          *ngIf="isFocus"  type="text" autofocus
+          *ngIf="isFocus"  type="text" autofocus 
           (keyup.enter)="inputBarcode(barcode.value)"
           (focus)="onFocusMethod()" 
           (blur)="onBlurMethod()" />
@@ -38,7 +55,9 @@
                 <input formControlName="_pddate"  
                 [min]="minDate"
                 [max]="maxDate"
+                [(ngModel)]="date"
                 (dateInput)="addEvent('input', $event)"
+            
                 matInput [matDatepicker]="picker">
                 <mat-datepicker-toggle matIconSuffix [for]="picker">
                 </mat-datepicker-toggle>
@@ -63,7 +82,7 @@
                 <mat-form-field class="w-10" appearance="outline" [style.width.%]='90' [style.height.%]='100' >
                     <mat-label>WCNO</mat-label>
                     <input formControlName="wcno" matInput type="text" #wcnof
-                    *ngIf="isFocus"  type="text" autofocus 
+                    *ngIf="isFocus"  type="text" autofocus  
                     [readonly]="true"
                     />
                 </mat-form-field>
@@ -139,7 +158,7 @@
               <tbody>
                   <tr *ngFor="let data of dataSource ;let i =index">
                       <td style="font-size: 15px;" scope="row">{{data.judgementResult}}</td>
-                      <td style="font-size: 13px;" scope="row">{{data.pddate |  date:'dd/MM/yyyy HH:mm' }}</td>
+                      <td style="font-size: 13px;" scope="row">{{data.pddate |  date:'MM/dd/yyyy HH:mm' }}</td>
                       <td style="font-size: 15px;" scope="row">{{data.judgementQty}}</td>
           
                   </tr>

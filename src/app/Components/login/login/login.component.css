@@ -1,0 +1,41 @@
+.example-full-width,
+.example-form-field {
+    width: 100% !important;
+}
+
+.logo {
+    /* object-fit: cover; */
+    width: 60px;
+    height: 60px;
+}
+
+.menu-login div>span {
+    font-size: 15px;
+    padding: 1rem;
+    font-weight: bolder;
+}
+
+.main-div{
+    
+    width: auto;
+     height: auto;
+     /* background-color: #fff; */
+     position: absolute;
+     left: 0;
+     right: 0;
+     top: 0;
+     bottom: 0;
+     margin: auto;
+     max-width: auto;
+     max-height: auto;
+     overflow: auto;
+     padding: 1em 2em;
+     /* border-bottom: 2px solid #ccc; */
+     display: table;
+  }
+
+  .example-card {
+    width: 90%;
+    margin-left: 10px;
+    margin-top: 50px; 
+  }

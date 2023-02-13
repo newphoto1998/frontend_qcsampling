@@ -1,21 +1,18 @@
 // import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild ,AfterViewInit} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common'
 import { SrvQcsamplingService } from 'src/app/Middleware/Services/srv-qcsampling.service';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from "@angular/material/form-field";
 import { QcsamplingDataTable } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTable';
 import Swal from 'sweetalert2';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import * as _moment from 'moment';
-// tslint:disable-next-line:no-duplicate-imports
+import { AuthenService } from 'src/app/Middleware/Services/authen.service';
+import { UserLoginInfo} from 'src/app/Models/QCsamplingInfo/qcsampling/userInfo'
 
 
 const moment = _moment;
@@ -50,20 +47,10 @@ export const MY_FORMATS = {
 })
 
 export class HomeComponent implements OnInit {
-  _date = moment();
+  _date = moment().utc();
   date_format !: string;
 
 
- 
-  // myFilter = (d: Date | null): boolean => {
-    
- 
-  //   const now_month =(d || new Date()).getMonth();
-  //   const year = new Date().getFullYear();
-  //   const month = new Date().getMonth()  
-  //   return (now_month === month);
-
-  // };
   @ViewChild('wcnof')
   wcnof!: ElementRef;
   @ViewChild('barcode')
@@ -72,9 +59,11 @@ export class HomeComponent implements OnInit {
 
 
   constructor( private formBulid: FormBuilder,
+    private elementRef: ElementRef,
     private SrvQcsamplingService: SrvQcsamplingService, private router: Router ,
     private route:ActivatedRoute,
-    public datepipe: DatePipe) { }
+    public datepipe: DatePipe,
+    public authService : AuthenService) { }
 
     displayedColumns = [
       'Sampling',
@@ -82,6 +71,13 @@ export class HomeComponent implements OnInit {
       'QTY',
 
     ];
+user_info :UserLoginInfo = this.authService.getUserInfo();
+code = this.user_info.code
+name = this.user_info.name
+
+codename = this.user_info.code
+
+
 payload !:any
 dataSource: QcsamplingDataTable[] = [];
 frmQCsampling!: FormGroup;
@@ -104,7 +100,6 @@ isBlur :boolean = false
 searchValue :any = "";
 keyboardInput !: string;
 date !: Date
-//latest_date !: string
 aftercheck_status !: boolean;
 selected !: string
 minDate !: Date
@@ -114,9 +109,10 @@ maxDate !: Date
 
 ngOnInit(): void {
 
-    this._date = moment();
-    this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
+ 
 
+    this._date = moment().utc()
+    this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
 
 
 
@@ -144,10 +140,12 @@ ngOnInit(): void {
     });
 
     this.frmBarcode = this.formBulid.group({ barcode:[''] });
-
+    //this.barcode.nativeElement.focus()
 
 
 }
+
+
 
 changeClient(vale:string){
   this.shift = vale
@@ -155,9 +153,15 @@ changeClient(vale:string){
 
 addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
   this._date = moment(event.value);
-  this.date_format = this._date.format('DD') + '-' + this._date.format('MM') + '-' + this._date.format('yyyy')
+  this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
 
+}
 
+onClickLogout(){
+  this.authService.DeleteUser();
+  this.router.navigate(['/login']).then(() => {
+    window.location.reload();
+  });
 }
 
 toggle(status:string) {
@@ -203,7 +207,7 @@ inputBarcode(data:string){
           this.frmBarcode.setValue({ barcode: '' });
 
 
-          this.frmQCsampling.setValue({ _pddate:moment(), _shift:this.shift,
+          this.frmQCsampling.setValue({ _pddate:this.date_format, _shift:this.shift,
                                         wcno: res[0].wcno, partno: res[0].part_no, 
                                         model: res[0].part_model, cm: res[0].cm, 
                                         desc: res[0].description,
@@ -216,16 +220,16 @@ inputBarcode(data:string){
                                       this.model = res[0].part_model
                                       this.cm = res[0].cm                                   
                                       
-                                      var payload = {
-                                        wcno:this.wcno ,
-                                        partno:this.partno,
-                                        cm:this.cm,
-                                        model:this.model,
-                                        shift:this.shift,
-                                        pddate:this.date_format,
-                                        judgementResult :"",
-                                        judgementQty :0
-                                      }
+                                      // var payload = {
+                                      //   wcno:this.wcno ,
+                                      //   partno:this.partno,
+                                      //   cm:this.cm,
+                                      //   model:this.model,
+                                      //   shift:this.shift,
+                                      //   pddate:this.date_format,
+                                      //   judgementResult :"",
+                                      //   judgementQty :0
+                                      // }
                                         
             this.route.queryParams.subscribe((param: any) => {
             this.SrvQcsamplingService.getSamplingDataTable(this.date_format,this.shift,this.wcno,
@@ -280,8 +284,9 @@ clear(){
 
 onSubmit(values: any, formDirective: FormGroupDirective)  {
   console.log(values)
+  
   if((this.frmQCsampling.valid) && (values.ok || values.ng)) {
-    this.SrvQcsamplingService.saveQCsamplingData(values).subscribe((res: any) => {
+    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.codename).subscribe((res: any) => {
       if (res == 'OK') {
           this.openDialog(true);
       }
@@ -293,15 +298,11 @@ onSubmit(values: any, formDirective: FormGroupDirective)  {
   }
     
 
-  this.barcode.nativeElement.focus();
+  //this.barcode.nativeElement.focus();
 
 }
 
 
-  //this.frmBarcode.setValue({ barcode: '' });
-  //this.frmBarcode.reset({ barcode: '' });
-
-  //this.frmQCsampling.reset({wcno:'',partno:'',model:'',cm: '',desc: '',hold_qty :0,ok: false,ng: false});
 
 
 
@@ -316,14 +317,7 @@ openDialog(status: boolean) {
       timer: 1500
     }).then(()=>this.reloadData());
     this.isHidden = true;
-    // if(this.aftercheck_status){
-    //   this.isHidden = false
-    //   alert('false' + this.aftercheck_status)
-    // } 
-    // else{
-    //   this.isHidden = true
-    //   alert('true' + this.aftercheck_status)
-    // } 
+
 
   } else {
     Swal.fire({
@@ -397,36 +391,12 @@ Clear(){
 
     this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
     this.frmQCsampling.reset();
-    this.frmQCsampling.setValue({ _pddate:moment(), _shift:this.shift})
-    this.barcode.nativeElement.focus();
+    //this.barcode.nativeElement.focus();
 
  
 }
 //   //this.router.navigate(['/', 'course']);
-// }
-// openDialog(status: boolean) {
-//     if (status) {
-//           Swal.fire({
-//           position: 'center',
-//           icon: 'success',
-//           title: 'บันทึกสำเร็จ',
-//           showConfirmButton: false,
-//           timer: 1500
-//       }).then(()=>this.router.navigate(['/', 'course']));
-//     } else {
-//         Swal.fire({
-//         position: 'center',
-//         icon: 'error',
-//         title: 'บันทึกไม่สำเร็จ',
-//         showConfirmButton: false,
-//         timer: 1500
-//     })
-// }
 
-// }
-onClickBack(){
-  this.router.navigate(['/course'])
-}
 
 
 }

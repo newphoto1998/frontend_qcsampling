@@ -2,23 +2,23 @@
 <!-- <h1>
   {{title}}
 </h1> -->
+<ng-container *ngIf="this.router.url.includes('login') || this.router.url == '/' || this.router.url.includes('?LinkDire') ; then Login; else NotLogin">
+</ng-container>
+<ng-template #Login>
+  <!-- Login page-->
+  <app-login></app-login>
+</ng-template>
 
-<!doctype html>
-<html lang="en">
 
-<head>
-    <!-- <title>Quiz - Admin</title> -->
 
-    <meta charset="utf-8">
-</head>
 
-<body>
-
+<ng-template #NotLogin>
+  <!-- <app-header class="d-none d-sm-none d-md-block" ></app-header> -->
   <app-home></app-home>
 
-</body>
+<ng-template >
 
-</html>
+
 
 
 

@@ -15,6 +15,7 @@ import { DatePipe } from '@angular/common'
 /*import { MatTableModule } from '@angular/material/table';*/
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AuthenService} from 'src/app/Middleware/Services/authen.service'
 
 // import { MatAutocompleteModule, MatButtonModule, MatCheckboxModule, MatDatepickerModule, 
 //   MatFormFieldModule, MatInputModule, MatRadioModule, MatSelectModule, MatSliderModule,MatCardModule,
@@ -31,6 +32,11 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //  import { MatDatepickerModule,MatNativeDateModule } from '@angular/material/datepicker'
   import { MatDatepickerModule } from '@angular/material/datepicker';
   import { MatNativeDateModule } from '@angular/material/core';
+import { LoginComponent } from './Components/login/login/login.component';
+import { CookieService } from 'ngx-cookie-service';
+import { MatMenuModule } from '@angular/material/menu';
+import { HashLocationStrategy,LocationStrategy } from '@angular/common';
+import { AuthenUserGuard } from 'src/app/Components/Auth/authen-user.guard';
 
 
   
@@ -39,9 +45,11 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     AppComponent,
     HeaderComponent,
     FooterComponent,
-    HomeComponent
+    HomeComponent,
+    LoginComponent
   ],
   imports: [
+    MatMenuModule,
     MatPaginatorModule,
     HttpClientModule,
     MatGridListModule,
@@ -66,7 +74,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     MatDialogModule,
     NgbModule
   ],
-  providers: [DatePipe ],
+  providers: [CookieService,DatePipe,AuthenUserGuard,AuthenService,{provide:LocationStrategy,useClass:HashLocationStrategy} ],
   bootstrap: [AppComponent],
   
 })

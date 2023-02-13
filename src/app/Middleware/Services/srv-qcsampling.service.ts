@@ -13,11 +13,10 @@ export class SrvQcsamplingService {
   constructor(private http: HttpClient, private config: ConfigsService,) { }
 
 
-
   getQrcodeData(qrcode:any){
 
     return this.http
-    .get<BarcodeDataInfoModule[]>(`${this.config.server_api}/api/QCSampling/getDataByQrcode?qrcode=${qrcode}`, {
+    .get<BarcodeDataInfoModule[]>(`${this.config.server_api}/api/QCSampling/getDataByQrcode/${qrcode}`, {
       responseType: 'json',
       observe: 'response',
     })
@@ -54,9 +53,9 @@ getSamplingDataTable(date:string,shift:string,wcno:string,partno:string,model:st
 
 
 
-  saveQCsamplingData(payload:any){
+  saveQCsamplingData(payload:any,date_format:string,codename:string){
   
-    return this.http.post(this.config.server_api + `/api/QCSampling/SaveQCsamplingData`, payload);
+    return this.http.post(this.config.server_api + `/api/QCSampling/SaveQCsamplingData/${date_format}/${codename}`, payload);
 
  }
 }
