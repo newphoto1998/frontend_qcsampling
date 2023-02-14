@@ -30,7 +30,7 @@ export class AuthenService {
     return this.cookies.get('user_info') ? true : false;
   }
   Login(code: any) : Observable<boolean> {
-      const body = { code: '',name: code.user};
+      const body = { code: '',name: code.user,fullname:''};
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       return this.http
         .post<boolean>(`${this.config.server_api}/api/QCSampling/login`, body, {

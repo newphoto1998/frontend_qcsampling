@@ -5,7 +5,7 @@
   
 <mat-card class="example-card">
 
-  <div class="row head">
+  <div class="row head" [hidden]="true">
  
     
     <div class="col-8 text-right">
@@ -13,11 +13,11 @@
    </div>
 
      
-  <div class="col-1 ">
+  <!-- <div class="col-1 ">
   
     
     <button class="logout" mat-raised-button color="warn"  (click)="onClickLogout()">ลงชื่อออก</button>
-  </div>
+  </div> -->
 </div>
 
  
@@ -158,7 +158,7 @@
               <tbody>
                   <tr *ngFor="let data of dataSource ;let i =index">
                       <td style="font-size: 15px;" scope="row">{{data.judgementResult}}</td>
-                      <td style="font-size: 13px;" scope="row">{{data.pddate |  date:'MM/dd/yyyy HH:mm' }}</td>
+                      <td style="font-size: 13px;" scope="row">{{data.pddate | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td style="font-size: 15px;" scope="row">{{data.judgementQty}}</td>
           
                   </tr>

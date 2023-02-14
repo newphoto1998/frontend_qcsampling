@@ -37,11 +37,15 @@ import { CookieService } from 'ngx-cookie-service';
 import { MatMenuModule } from '@angular/material/menu';
 import { HashLocationStrategy,LocationStrategy } from '@angular/common';
 import { AuthenUserGuard } from 'src/app/Components/Auth/authen-user.guard';
+import { MatToolbarModule } from '@angular/material/toolbar'
+import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatSidenavModule } from '@angular/material/sidenav'
 
 
   
 @NgModule({
   declarations: [
+
     AppComponent,
     HeaderComponent,
     FooterComponent,
@@ -49,6 +53,9 @@ import { AuthenUserGuard } from 'src/app/Components/Auth/authen-user.guard';
     LoginComponent
   ],
   imports: [
+    MatSidenavModule,
+    MatToolbarModule,
+    MatTooltipModule,
     MatMenuModule,
     MatPaginatorModule,
     HttpClientModule,

@@ -74,6 +74,7 @@ export class HomeComponent implements OnInit {
 user_info :UserLoginInfo = this.authService.getUserInfo();
 code = this.user_info.code
 name = this.user_info.name
+fullname = this.user_info.fullname
 
 codename = this.user_info.code
 
@@ -109,7 +110,7 @@ maxDate !: Date
 
 ngOnInit(): void {
 
- 
+
 
     this._date = moment().utc()
     this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
@@ -133,7 +134,7 @@ ngOnInit(): void {
       partno:['',Validators.required],
       model:['',Validators.required],
       cm: [''],
-      desc: ['',Validators.required],
+      desc: [''],
       hold_qty : [0],
       ok: [false],
       ng: [false]
@@ -209,8 +210,8 @@ inputBarcode(data:string){
 
           this.frmQCsampling.setValue({ _pddate:this.date_format, _shift:this.shift,
                                         wcno: res[0].wcno, partno: res[0].part_no, 
-                                        model: res[0].part_model, cm: res[0].cm, 
-                                        desc: res[0].description,
+                                        model: res[0].part_model, cm: res[0].cm == '' ? '-' : res[0].cm  , 
+                                        desc: res[0].description == '' ? '-' : res[0].description,
                                         hold_qty : 0, ok: false,ng: false
                                       });
                                       
@@ -234,10 +235,9 @@ inputBarcode(data:string){
             this.route.queryParams.subscribe((param: any) => {
             this.SrvQcsamplingService.getSamplingDataTable(this.date_format,this.shift,this.wcno,
             this.partno + '_' + this.cm ,this.model).subscribe((dt: QcsamplingDataTable[]) => {
-                if(res){
-
+                if(dt){
                     this.dataSource = dt
-                  
+
                   }
 
 
@@ -264,7 +264,7 @@ reloadData(){
         if(dt){
 
             this.dataSource = dt
-          
+        
           }
 
 
@@ -286,7 +286,7 @@ onSubmit(values: any, formDirective: FormGroupDirective)  {
   console.log(values)
   
   if((this.frmQCsampling.valid) && (values.ok || values.ng)) {
-    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.codename).subscribe((res: any) => {
+    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.fullname).subscribe((res: any) => {
       if (res == 'OK') {
           this.openDialog(true);
       }

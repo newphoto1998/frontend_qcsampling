@@ -28,20 +28,17 @@ export class AuthenUserGuard implements CanActivate {
     }
     else{
 
-      
-
       Swal.fire('Warning!', 'Session หมดอายุ', 'warning').then(()=>{
        
-        this.router.navigate(['login'], {queryParams: { LinkDire: state.url }
-        
-        
-      });
+        this.router.navigate(['login'], {queryParams: { LinkDire: state.url }});
+  
       return false;
 
       });
+     
       return false;
 
-
+  
     }
   }
 

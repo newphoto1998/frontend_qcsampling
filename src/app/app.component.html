@@ -2,6 +2,7 @@
 <!-- <h1>
   {{title}}
 </h1> -->
+<app-header></app-header>
 <ng-container *ngIf="this.router.url.includes('login') || this.router.url == '/' || this.router.url.includes('?LinkDire') ; then Login; else NotLogin">
 </ng-container>
 <ng-template #Login>
