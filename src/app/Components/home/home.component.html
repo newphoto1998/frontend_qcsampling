@@ -29,7 +29,7 @@
         <mat-form-field id="barcode-input-focus"  appearance="outline" [style.width.%]="130" 
           [ngClass]="{'barcode-input-blur': (isBlur == false) , 'barcode-input-focus': isBlur == true}">
           <mat-label>INPUT BARCODE</mat-label>
-          <input #barcode formControlName="barcode" matInput type="text" autocomplete="off"
+          <input hideKeyboard #barcode formControlName="barcode" matInput type="text" autocomplete="off"
           *ngIf="isFocus"  type="text" autofocus 
           (keyup.enter)="inputBarcode(barcode.value)"
           (focus)="onFocusMethod()" 
@@ -180,7 +180,7 @@
                 <div [hidden]="isHidden">
                   <mat-form-field appearance="outline" [style.width.%]='100' [style.height.%]='10' class="barcode-input-focus">
                     <mat-label>QTY</mat-label>
-                    <input #hold_qty formControlName="hold_qty" type="number" matInput >
+                    <input hideKeyboard #hold_qty formControlName="hold_qty" type="number" matInput >
                   </mat-form-field>
                 </div>
               </div>

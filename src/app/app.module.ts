@@ -40,6 +40,7 @@ import { AuthenUserGuard } from 'src/app/Components/Auth/authen-user.guard';
 import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { MatSidenavModule } from '@angular/material/sidenav'
+import { HideKeyboardModule } from 'hide-keyboard';
 
 
   
@@ -53,6 +54,7 @@ import { MatSidenavModule } from '@angular/material/sidenav'
     LoginComponent
   ],
   imports: [
+    HideKeyboardModule,
     MatSidenavModule,
     MatToolbarModule,
     MatTooltipModule,

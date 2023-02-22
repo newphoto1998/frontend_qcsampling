@@ -76,7 +76,7 @@ code = this.user_info.code
 name = this.user_info.name
 fullname = this.user_info.fullname
 
-codename = this.user_info.code
+
 
 
 payload !:any
@@ -115,16 +115,7 @@ ngOnInit(): void {
     this._date = moment().utc()
     this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
 
-
-
-    this.date = new Date();  
-    this.minDate = new Date(this.date.getFullYear(),this.date.getMonth(),1)
-    this.maxDate = new Date(this.date.getFullYear(),this.date.getMonth(),this.date.getDate())
-    if(this.date.getHours() >= 8 && this.date.getHours() <= 20){
-       this.selected = this.shift = "D"
-      }else{
-        this.selected = this.shift = "N"
-      }
+    this.getCurrentShif();
 
     this.isFocus = !this.isFocus;
     this.frmQCsampling = this.formBulid.group({
@@ -141,7 +132,6 @@ ngOnInit(): void {
     });
 
     this.frmBarcode = this.formBulid.group({ barcode:[''] });
-    //this.barcode.nativeElement.focus()
 
 
 }
@@ -271,10 +261,12 @@ reloadData(){
     });
 
 });
+this.barcode.nativeElement.focus();
+
  this.frmQCsampling.controls['ok'].setValue(false)
  this.frmQCsampling.controls['ng'].setValue(false)
  this.frmQCsampling.controls['hold_qty'].setValue('0');
-
+//this.wcnof.nativeElement.focus();
 }
 
 clear(){
@@ -286,7 +278,7 @@ onSubmit(values: any, formDirective: FormGroupDirective)  {
   console.log(values)
   
   if((this.frmQCsampling.valid) && (values.ok || values.ng)) {
-    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.fullname).subscribe((res: any) => {
+    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.name).subscribe((res: any) => {
       if (res == 'OK') {
           this.openDialog(true);
       }
@@ -298,7 +290,7 @@ onSubmit(values: any, formDirective: FormGroupDirective)  {
   }
     
 
-  //this.barcode.nativeElement.focus();
+  this.barcode.nativeElement.focus();
 
 }
 
@@ -383,7 +375,16 @@ openDialogWarning() {
 //         })
 //     }
 // }
-
+getCurrentShif(){
+    this.date = new Date();  
+    this.minDate = new Date(this.date.getFullYear(),this.date.getMonth(),1)
+    this.maxDate = new Date(this.date.getFullYear(),this.date.getMonth(),this.date.getDate())
+    if(this.date.getHours() >= 8 && this.date.getHours() <= 20){
+      this.selected = this.shift = "D"
+      }else{
+        this.selected = this.shift = "N"
+      }
+}
 
  
 Clear(){
@@ -391,7 +392,9 @@ Clear(){
 
     this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
     this.frmQCsampling.reset();
-    //this.barcode.nativeElement.focus();
+    this.frmQCsampling.controls['_pddate'].setValue(moment())
+    this.frmQCsampling.controls['_shift'].setValue(this.selected)
+    this.barcode.nativeElement.focus();
 
  
 }
