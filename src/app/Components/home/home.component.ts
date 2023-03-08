@@ -78,7 +78,7 @@ fullname = this.user_info.fullname
 
 
 
-
+SpinnerStatus = true
 payload !:any
 dataSource: QcsamplingDataTable[] = [];
 frmQCsampling!: FormGroup;
@@ -275,7 +275,7 @@ clear(){
 
 
 onSubmit(values: any, formDirective: FormGroupDirective)  {
-  console.log(values)
+  this.SpinnerStatus = true
   
   if((this.frmQCsampling.valid) && (values.ok || values.ng)) {
     this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.name).subscribe((res: any) => {
@@ -311,6 +311,7 @@ openDialog(status: boolean) {
     this.isHidden = true;
 
 
+
   } else {
     Swal.fire({
       position: 'center',
@@ -324,7 +325,7 @@ openDialog(status: boolean) {
 
   }
 
-
+  this.SpinnerStatus = false
 }
 
 

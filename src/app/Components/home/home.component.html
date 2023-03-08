@@ -203,4 +203,11 @@
     </form>
   
   </mat-card>
+
+  <ng-container *ngIf=SpinnerStatus>
+    <div class="overlay"></div>
+    <mat-progress-spinner class="display"
+    [mode]="'indeterminate'"></mat-progress-spinner>
+  
+  </ng-container>
 </div>
