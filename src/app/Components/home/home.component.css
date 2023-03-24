@@ -2,6 +2,12 @@
 .row.head{
   margin-left: 20px;
 }
+h3 {
+  font: 14px/28px Roboto, "Helvetica Neue", sans-serif;
+  font-weight: bold;
+  letter-spacing: normal;
+  margin:-8px 0px 1px
+}
 
 .overlay{
   position: absolute;

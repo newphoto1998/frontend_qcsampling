@@ -1,5 +1,5 @@
 export class QcsamplingDataTable{
-
+    docno !:string
     wcno !:string
     partno !:string
     cm !:string
@@ -10,6 +10,7 @@ export class QcsamplingDataTable{
     ng !:boolean
     shift !:string
     pddate !:string
+    inspectiondate !:string
     judgementResult !:string
     judgementQty !:number
 

@@ -7,5 +7,6 @@ export class BarcodeDataInfoModule{
     part_no!:string;
     cm!:string;
     description!:string
+    total!:number
   
   }

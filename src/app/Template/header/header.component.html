@@ -1,34 +1,41 @@
-<!-- <mat-toolbar color="primary">
-  <button mat-icon-button (click)="onClickNavToggle()">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>EMQ</span>
-  <span class="example-spacer"></span>
-  <div class="d-flex">
-    <button mat-button [matMenuTriggerFor]="menu">
-      <img
-        class="avatar rounded-circle bg-white me-2"
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/250px-Angular_full_color_logo.svg.png"
-        alt=""
-      />
-      <span>Pattarapol Houdhang</span>
+
+<mat-toolbar color="primary" *ngIf="login">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="opened=!opened">
+      <mat-icon>more_vert</mat-icon>
     </button>
-  </div>
+    
+    <span class="example-spacer">{{title}}</span>
+    <div class="image-container d-flex align-items-center" >
+      <label>{{Usercode}}</label> &nbsp;
+      <img class="rounded-circle elevation-2"   src="http://dcidmc.dci.daikin.co.jp/PICTURE/{{Usercode}}.JPG" width="40" height="40" alt="">
+
+    </div>
+  </mat-toolbar-row>
 </mat-toolbar>
 
-<mat-menu #menu="matMenu">
-  <button mat-menu-item disabled>
-    <mat-icon>info</mat-icon>
-    <span>infomation</span>
-  </button>
-  <button mat-menu-item routerLink="/" routerLinkActive="active">
-    <mat-icon>logout_outline</mat-icon>
-    <span>Logout</span>
-  </button>
-</mat-menu> -->
-<!-- Navbar -->
+<mat-sidenav-container [hasBackdrop]="true">
+  <mat-sidenav [(opened)]="opened" #sideNav>
+      <mat-list >
+          <ng-container *ngFor="let item of listMenu">
+              <mat-list-item><a (click)="selectedComponent(item.text)" routerLink="{{item.routeLink}}">{{item.text}}</a></mat-list-item>
+          </ng-container>
+          <mat-list-item><button (click)="loginPage()" mat-menu-item>Logout</button></mat-list-item>
+      </mat-list>
+  </mat-sidenav>
+    <mat-sidenav-content class="bg-slate-50">
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+</mat-sidenav-container>
 
-<mat-toolbar color="primary" *ngIf="login" >
+<!-- <mat-menu #menu="matMenu">
+  <button (click)="loginPage()" mat-menu-item>Logout</button>
+
+</mat-menu> -->
+
+
+
+<!-- <mat-toolbar color="primary" *ngIf="login" >
   <div class="example-spacer">
 
   </div>
@@ -39,14 +46,12 @@
   <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
     <mat-icon>more_vert</mat-icon>
   </button>
-  <mat-menu #menu="matMenu">
-    <button (click)="loginPage()" mat-menu-item>Logout</button>
- 
-  </mat-menu>
+  
 
 
 
-</mat-toolbar>
+
+</mat-toolbar> -->
 <!-- /.navbar -->
 <!-- <mat-menu #menu="matMenu">
   <button mat-menu-item (click)="clickRegister()">

@@ -31,7 +31,7 @@
           <mat-label>INPUT BARCODE</mat-label>
           <input hideKeyboard #barcode formControlName="barcode" matInput type="text" autocomplete="off"
           *ngIf="isFocus"  type="text" autofocus 
-          (keyup.enter)="inputBarcode(barcode.value)"
+          (keyup.enter)="inputBarcode(barcode.value,date_format,shift.value)"
           (focus)="onFocusMethod()" 
           (blur)="onBlurMethod()" />
           
@@ -41,7 +41,8 @@
       </form></mat-card-title>
  
   </mat-card-header >
-    <form [formGroup]="frmQCsampling" #formDirective="ngForm" (submit)="onSubmit(frmQCsampling.value, formDirective)">
+
+    <form [formGroup]="frmQCsampling" #formDirective="ngForm">
         <mat-card-content class="p-3">
 
           <div class="row">
@@ -57,7 +58,6 @@
                 [max]="maxDate"
                 [(ngModel)]="date"
                 (dateInput)="addEvent('input', $event)"
-            
                 matInput [matDatepicker]="picker">
                 <mat-datepicker-toggle matIconSuffix [for]="picker">
                 </mat-datepicker-toggle>
@@ -65,6 +65,7 @@
               </mat-form-field>
               
             </div>
+            
       
             <div class="col-6">              
               <mat-form-field id="shift_input" appearance="outline" [style.width.%]='100' class="date-input-focus" >
@@ -73,8 +74,16 @@
                   <mat-option value="D">D</mat-option>
                   <mat-option value="N">N</mat-option>
                 </mat-select>
+               
+             
               </mat-form-field>
+
+              <h3>ยอดผลิต: {{total_stock| number}}</h3>
+             
+         
             </div>
+
+         
       
           </div>
             <div class="row">
@@ -149,17 +158,17 @@
             <table class="table table-striped table-hover w-100">
               <thead class="table-primary">
                 <tr>
-                  <th style="font-size: 15px;">Sampling</th>
-                  <th style="font-size: 15px;">DATE</th>
-                  <th style="font-size: 15px;">QTY</th>
+                  <th style="font-size: 15px;">วันที่ Sampling</th>
+                  <th style="font-size: 15px;">Result</th>
+                  <th style="font-size: 15px;">จำนวนที่ HOLD</th>
         
                 </tr>
               </thead>
               <tbody>
                   <tr *ngFor="let data of dataSource ;let i =index">
-                      <td style="font-size: 15px;" scope="row">{{data.judgementResult}}</td>
-                      <td style="font-size: 13px;" scope="row">{{data.pddate | date:'dd/MM/yyyy HH:mm' }}</td>
-                      <td style="font-size: 15px;" scope="row">{{data.judgementQty}}</td>
+                      <td style="font-size: 12px;" scope="row">{{data.pddate}}</td>
+                      <td style="font-size: 15px;" scope="row">{{data.judgementResult}}</td>               
+                      <td style="font-size: 15px;" scope="row">{{data.judgementQty == 0 ? "" : data.judgementQty}}</td>
           
                   </tr>
               </tbody>
@@ -180,21 +189,26 @@
                 <div [hidden]="isHidden">
                   <mat-form-field appearance="outline" [style.width.%]='100' [style.height.%]='10' class="barcode-input-focus">
                     <mat-label>QTY</mat-label>
-                    <input hideKeyboard #hold_qty formControlName="hold_qty" type="number" matInput >
+                    <input hideKeyboard #hold_qty formControlName="hold_qty" 
+                    type="number" matInput max={{total_stock}} min=1 >
                   </mat-form-field>
                 </div>
               </div>
+              <div [hidden]="isHidden"> 
+                <mat-hint style="font-weight: bold; font-size: 15px;">* จำนวนที่ Sampling&nbsp; &nbsp; &nbsp; &nbsp; = {{total_samling | number}}</mat-hint> <br>
+                <mat-hint style="font-weight: bold; font-size: 15px;">* ยอด Sampling คงเหลือ = {{total_stock - total_samling}}</mat-hint>
+              </div>
+
             </div>
               
             </section>
         
-
-    
+          
           <div class="d-flex justify-content-end">
-         
-            <button mat-raised-button color="primary"  disabled={{!formDirective.valid}} value="submit" class="my-class">บันทึก</button>
+            <!-- <button mat-raised-button color="primary"  [disabled]="datapack.length > 0 && subMit ? false : true" value="submit" (click)="onSubmit()"class="my-class">บันทึก</button> -->
+            <button mat-raised-button color="primary"  [disabled]="subMit" value="submit" (click)="onSubmit()"class="my-class">บันทึก</button>
             &nbsp;
-            <button mat-raised-button color="warn"  disabled={{!formDirective.valid}} (click)="Clear()" class="my-class">ล้างข้อมูล</button> 
+            <button mat-raised-button color="warn"  disabled={{!datapack.length}} (click)="Clear()" class="my-class">ล้างข้อมูล</button> 
 
           </div>
       </div>

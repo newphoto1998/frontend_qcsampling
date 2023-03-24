@@ -1,0 +1,221 @@
+<div class="main-div">
+  
+  <mat-card class="example-card">
+  
+    <div class="row head" [hidden]="true">
+   
+      <div class="col-8 text-right">
+          <h5 style="font-weight: bold; font-size: 12px;">{{code}} {{name}}</h5>  
+     </div>
+
+  </div>
+  
+   
+    <mat-card-header>
+ 
+      <mat-card-title>
+     
+    
+        <form [formGroup]="frmBarcode" #frmInpBarcode="ngForm" >
+         
+          <mat-form-field id="barcode-input-focus"  appearance="outline" [style.width.%]="130" 
+            [ngClass]="{'barcode-input-blur': (isBlur == false) , 'barcode-input-focus': isBlur == true}">
+            <mat-label>INPUT BARCODE</mat-label>
+            <input hideKeyboard #barcode formControlName="barcode" matInput type="text" autocomplete="off"
+            *ngIf="isFocus"  type="text" autofocus 
+            (keyup.enter)="inputBarcode(barcode.value,date_format,shift.value)"
+            (focus)="onFocusMethod()" 
+            (blur)="onBlurMethod()" />
+            
+          </mat-form-field>
+          
+      
+        </form></mat-card-title>
+   
+    </mat-card-header >
+    <form [formGroup]="frmQCsampling" #formDirective="ngForm">
+
+          <mat-card-content class="p-3">
+  
+            <div class="row">
+            
+   
+              <div class="col-6">
+              
+                <mat-form-field appearance="outline" [style.width.%]='100' class="date-input-focus">
+                  <mat-label>Choose a date</mat-label>
+                  <input formControlName="_pddate"  
+                  [min]="minDate"
+                  [max]="maxDate"
+                  [(ngModel)]="date"
+                  (dateInput)="addEvent('input', $event)"
+              
+                  matInput [matDatepicker]="picker">
+                  <mat-datepicker-toggle matIconSuffix [for]="picker">
+                  </mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+                
+              </div>
+        
+              <div class="col-6">              
+                <mat-form-field id="shift_input" appearance="outline" [style.width.%]='100' class="date-input-focus" >
+                  <mat-label>Select shift</mat-label>
+                  <mat-select [(value)]="selected" (selectionChange)="changeClient($event.value)" formControlName="_shift" #shift >
+                    <mat-option value="D">D</mat-option>
+                    <mat-option value="N">N</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+        
+            </div>
+              <div class="row">
+                 <div class="col-4 col-sm-6">
+                  <mat-form-field class="w-10" appearance="outline" [style.width.%]='90' [style.height.%]='100' >
+                      <mat-label>WCNO</mat-label>
+                      <input formControlName="wcno" matInput type="text" #wcnof
+                      *ngIf="isFocus"  type="text" autofocus  
+                      [readonly]="true"
+                      />
+                  </mat-form-field>
+                </div>
+  
+                <div class="col-5">
+                  <mat-form-field class="w-100"  [style.width.%]='90'appearance="outline" >
+                    <mat-label>PARTNO</mat-label>
+                    <input formControlName="partno" matInput type="text" [readonly]="true"  />
+                </mat-form-field>
+                </div>
+                
+              
+         
+                <div class="col-3 col-sm-3">          
+                  <mat-form-field [style.width.%]='100' [style.height.%]='100' appearance="outline" >
+                  <mat-label>CM</mat-label>
+                  <input formControlName="cm" matInput type="text" [readonly]="true" />
+              </mat-form-field></div>
+              </div>
+            
+              <div class="row">
+                <div class="col-5">     <mat-form-field class="w-100"  appearance="outline">
+                  <mat-label>MODEL</mat-label>
+                  <input formControlName="model" matInput type="text" [readonly]="true" />
+                </mat-form-field></div>
+                <div class="col-6 col-sm-3">
+                  <mat-form-field class="test" appearance="outline" [style.width.%]='120' [style.height.%]='100'>
+                      <mat-label>DESCRIPTION</mat-label>
+                      <input formControlName="desc"  type="text" matInput [readonly]="true" >
+                  </mat-form-field>
+              </div>
+            
+              </div>        
+             <div  style="overflow-x: auto;">
+              <div class="table table-bordered">
+                <div class="table-header table-row">
+                  <div class="td"></div>
+                  <div class="td">TIME</div>
+                  <div class="td">QTY</div>
+                  <div class="td">ACTION</div>
+                </div>
+                <div class="table-row" *ngFor="let row of rows ; let rowIndex = index">
+                
+                    <div class="td" [class.clickable]="isRowClickable(rowIndex)" (click)="expanded[row.docno] = !expanded[row.docno]">
+                      <span  *ngIf="isRowClickable(rowIndex)">
+                        <span *ngIf="expanded[row.docno]">-</span>
+                        <span *ngIf="!expanded[row.docno]">+</span>
+                      </span>
+                    </div>
+                    <div class="td fix2">{{row.pddate}}</div>
+                    <div class="td">
+
+                      <div *ngIf="enableEdit && enableEditIndex == rowIndex; else showdata">
+               
+                        ยอด HOLD ตั้งต้น &nbsp; <input matInput  type="number" [value]="row.judgementQty" >
+                       <hr>
+                       จำนวนที่  UNHOLD<input matInput  type="number"  [value]="hold_qty_total" >
+                       <hr>
+                        ยอดHOLD คงเหลือ<input matInput  type="number"  [value]="row.judgementQty - hold_qty_total" >
+                        <hr>
+                        <mat-form-field class="w-10"  >
+                            <input matInput  type="number" 
+                            #holdqty
+                            [value]="0"
+                            (keyup)="updateVal($event,rowIndex)"
+                       
+                            autocomplete="off"
+                            style="background-color: #faffb3;"
+                            >
+                        </mat-form-field>
+             
+                        </div>
+                        
+                        <ng-template #showdata >
+                          {{row.judgementQty}} 
+                        </ng-template>  
+
+                     
+                      </div>
+
+
+                        
+                    <div class="td">    
+                      
+
+                      <button [disabled]="callFunction(rowIndex)" class="hold-button fix" *ngIf="!enableEdit " mat-flat-button color="primary" matTooltip="Hold"  (click)="enableEditMethod($event, rowIndex) " matTooltipPosition="left">ปลด</button> 
+
+
+                        <button [disabled]="isCheckButton" class="save-button" *ngIf="enableEdit && enableEditIndex == rowIndex" mat-flat-button color="primary" matTooltip="Confrim" (click)="InsertHoldScrap(rowIndex,row.docno)" matTooltipPosition="left">
+                          OK</button> 
+                        &nbsp;
+                        <button class="save-button" *ngIf="enableEdit && enableEditIndex == rowIndex" mat-flat-button color="warn" matTooltip="Cancel" (click)="enableEdit=false " matTooltipPosition="right">
+                         Cancel
+                        </button> 
+                    
+                      
+                       
+                    </div>
+                    
+                    
+                    
+                    
+                    <div [@detailExpand]="expanded[row.docno]  ? 'expanded' : 'collapsed'">
+              
+
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th scope="col">TIME</th>
+                          <th scope="col">HOLD</th>
+                          <th scope="col">CBY</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      
+                          <tr *ngFor="let childrow of row.sub_table">
+                            <td>{{childrow.time}}</td>
+                            <td>{{childrow.hold_qty}}</td>
+                            <td>{{childrow.cby}}</td>
+                          </tr>
+                     
+                       
+                       
+                      </tbody>
+                    </table>
+                  </div>
+                  </div>
+                </div>
+              </div>
+              
+
+          </mat-card-content>
+     
+  </form>
+</mat-card>
+  
+    <ng-container *ngIf=SpinnerStatus>
+      <div class="overlay"></div>
+      <mat-progress-spinner class="display"
+      [mode]="'indeterminate'"></mat-progress-spinner>
+    
+    </ng-container>
+  </div>

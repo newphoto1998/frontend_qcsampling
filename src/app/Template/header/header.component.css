@@ -40,3 +40,11 @@ label{
     /* Support for IE. */
     font-feature-settings: 'liga';
   }
+
+  mat-sidenav-container {
+    height: calc(205vh - 115vh);
+}
+
+mat-sidenav {
+    width: 175px;
+}

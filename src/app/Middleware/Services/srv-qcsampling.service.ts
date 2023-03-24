@@ -4,28 +4,33 @@ import { ConfigsService } from '../configs.service';
 import { map, Observable } from 'rxjs';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
 import { QcsamplingDataTable } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTable';
+import { QcsamplingDataTableHold } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTableHold';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SrvQcsamplingService {
+  headers = new HttpHeaders().set('content-type', 'application/json');
 
   constructor(private http: HttpClient, private config: ConfigsService,) { }
 
 
-  getQrcodeData(qrcode:any){
+  getQrcodeData(payload:any){
 
     return this.http
-    .get<BarcodeDataInfoModule[]>(`${this.config.server_api}/api/QCSampling/getDataByQrcode/${qrcode}`, {
-      responseType: 'json',
+    .post<any>(`${this.config.server_api}/api/QCSampling/getDataByQrcode`,payload, {
       observe: 'response',
+      responseType: 'json',
+      headers: this.headers,
     })
     .pipe(
-      map((response: any) => {
-        if (response.ok) {
-          return response.body;
+      map((res: any) => {
+
+
+        if (res) {
+          return res.body;
         } else {
-          return response;
+          return;
         }
       })
     );
@@ -33,22 +38,48 @@ export class SrvQcsamplingService {
 
 
 
-getSamplingDataTable(date:string,shift:string,wcno:string,partno:string,model:string){
+getSamplingDataTable(payload:any){
+  // return this.http
+  // .post<any>(`${this.config.server_api}/api/QCSampling/getSamplingDataTables`,payload, {
+  //   observe: 'response',
+  //   responseType: 'json',
+  //   headers: this.headers,
+  // })
+  // .pipe(
+  //   map((res: any) => {
 
+
+  //     if (res) {
+  //       return res.body;
+  //     } else {
+  //       return;
+  //     }
+  //   })
+  // );
+  return this.http.post<any>(`${this.config.server_api}/api/QCSampling/getSamplingDataTables`,payload);
+
+
+}
+
+
+getSamplingDataTableHold(payload:any){
   return this.http
-  .get<QcsamplingDataTable[]>(`${this.config.server_api}/api/QCSampling/getSamplingDataTable/${date}/${shift}/${wcno}/${partno}/${model}`, {
+  .post<QcsamplingDataTableHold>(`${this.config.server_api}/api/QCSampling/getSamplingDataTableHold`,payload, {
     responseType: 'json',
     observe: 'response',
+    headers: this.headers,
   })
   .pipe(
     map((response: any) => {
       if (response.ok) {
-        return response.body;
+          return response.body;
       } else {
-        return response;
+          return false;
       }
     })
   );
+
+
 }
 
 
@@ -58,6 +89,14 @@ getSamplingDataTable(date:string,shift:string,wcno:string,partno:string,model:st
     return this.http.post(this.config.server_api + `/api/QCSampling/SaveQCsamplingData/${date_format}/${codename}`, payload);
 
  }
+
+
+ 
+ saveQCHoldScrapData(payload:any){
+  
+  return this.http.post(this.config.server_api + `/api/QCSampling/SaveHoldScrapData`, payload);
+
+}
 }
 
 

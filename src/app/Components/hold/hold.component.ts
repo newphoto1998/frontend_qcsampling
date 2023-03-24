@@ -1,6 +1,5 @@
-// import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild ,AfterViewInit} from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormGroupDirective, MinValidator, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common'
 import { SrvQcsamplingService } from 'src/app/Middleware/Services/srv-qcsampling.service';
@@ -13,7 +12,11 @@ import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import * as _moment from 'moment';
 import { AuthenService } from 'src/app/Middleware/Services/authen.service';
 import { UserLoginInfo} from 'src/app/Models/QCsamplingInfo/qcsampling/userInfo'
-
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import { QcsamplingDataTableHold } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTableHold';
 
 const moment = _moment;
 
@@ -30,10 +33,29 @@ export const MY_FORMATS = {
 };
 
 
+
+
+export interface Row {
+  docno: string,
+  pddate: string,
+  judgementQty: number,
+  Sub_table?: Sub[]
+}
+
+export interface Sub {
+  
+  time: string,
+  hold_qty: string,
+  cby: string,
+  
+}
+
+
+
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+  selector: 'app-hold',
+  templateUrl: './hold.component.html',
+  styleUrls: ['./hold.component.css'],
   providers: [
 
     {
@@ -44,9 +66,26 @@ export const MY_FORMATS = {
 
     {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS},
   ],
-})
 
-export class HomeComponent implements OnInit {
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({ height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
+})
+export class HoldComponent implements OnInit {
+
+  expanded: {[key: string]: boolean} = {};
+
+  rows !: any
+
+  //rows = ROWS
+  
+
+  datasourcess !: any
+
   _date = moment().utc();
   date_format !: string;
 
@@ -56,8 +95,9 @@ export class HomeComponent implements OnInit {
   @ViewChild('barcode')
   barcode!: ElementRef;
   @ViewChild('shift') teams!: ElementRef;
-
-
+  @ViewChild(MatSort, { static: true }) sort!: MatSort;
+  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+  jq = 0;
   constructor( private formBulid: FormBuilder,
     private elementRef: ElementRef,
     private SrvQcsamplingService: SrvQcsamplingService, private router: Router ,
@@ -66,27 +106,30 @@ export class HomeComponent implements OnInit {
     public authService : AuthenService) { }
 
     displayedColumns = [
-      'Sampling',
-      'Date',
-      'QTY',
+      'TIME',
+      'RESULT',
+      'ACTION'
 
     ];
+ 
+i = 1;
 user_info :UserLoginInfo = this.authService.getUserInfo();
 code = this.user_info.code
 name = this.user_info.name
 fullname = this.user_info.fullname
+enableEdit = false;
+enableallEdit = false;
+enableEditIndex = null;
 
-
-rateInput !:number
+dataSource = new MatTableDataSource<QcsamplingDataTable>();
+docno !:string
+total!:string
 SpinnerStatus = false
 payload !:any
-dataSource: QcsamplingDataTable[] = [];
 frmQCsampling!: FormGroup;
 frmBarcode!:FormGroup;
 ischeck !: boolean;
 ischeck2 !: boolean;
-subMit = true
-datapack : BarcodeDataInfoModule[] = []
 isHidden = true;
 ymd !: string;
 shift !:string;
@@ -94,9 +137,6 @@ wcno !:string;
 partno !:string;
 cm !: string;
 model !: string
-total_stock  = 0;
-total_samling = 0
-remain_sampling = 0
 isFocus :boolean = false;
 isBlur :boolean = false
 searchValue :any = "";
@@ -105,13 +145,14 @@ date !: Date
 selected !: string
 minDate !: Date
 maxDate !: Date
-
-
+hold_qty_total = 0;
+hold_qty_old !: number
+hold_qty_new !: number
+isCheckButton = false
+disableButton = false
+qrcode !: string
 
 ngOnInit(): void {
-
-
-
     this._date = moment().utc()
     this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
 
@@ -126,62 +167,44 @@ ngOnInit(): void {
       model:['',Validators.required],
       cm: [''],
       desc: [''],
-      hold_qty : [this.total_stock,Validators.max(Number(this.total_stock))],
-      ok: false,
-      ng: false
+
     });
 
     this.frmBarcode = this.formBulid.group({ barcode:[''] });
-    this.frmQCsampling.valueChanges.subscribe(data=>{
-      if(data.ok && this.datapack.length){
-        this.subMit = false;
-      }else{
-        if(this.datapack.length > 0){
-          this.remain_sampling = this.total_stock - this.total_samling  // ยอดการผลิต - ยอดที่ sampling ไปแล้ว
-          if(this.total_samling > 0){
-            this.subMit = data.hold_qty > 0 && data.hold_qty <= this.remain_sampling  ? false : true
-        
-
-          }else{
-            this.subMit = data.hold_qty > 0 && data.hold_qty <= this.total_stock  ? false : true
-
-
-          }
-        }
-        
-
-      }
-    })
 
 }
 
+callFunction(rowIndex:number):boolean{
+    
+  this.hold_qty_total = 0;
+  
+    this.hold_qty_old =this.rows[rowIndex].judgementQty //ค่าเก่า
+    for(var val in this.rows[rowIndex].sub_table){
+      this.hold_qty_total += Number(this.rows[rowIndex].sub_table[val].hold_qty)
+   
+     }
+   
+    
+    if(this.hold_qty_total  >= this.hold_qty_old ){
+      
+
+      return true;
+    }else{
+    
+
+
+      return false;
+    }
+}
+  
+isRowClickable(rowIndex: number): any  {
+  return this.rows[rowIndex].sub_table! && this.rows[rowIndex].sub_table!.length > 0
+
+}
 
 
 changeClient(vale:string){
   this.shift = vale
-  if(this.shift == "N"){
-    var ndate =  this.date.setDate(this.date.getDate() - 1);
-    this.frmQCsampling.controls['_pddate'].setValue(moment(ndate)) 
-  }
-
-  var payload = {
-    pddate:this.date_format,                                        
-    shift:this.shift,
-    wcno:this.wcno,
-    partno:this.partno,
-    cm:this.cm,
-    model:this.model,
-  
-
-  }
-
-  this.loaddataTable(payload)
-}
-
-addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
-  this._date = moment(event.value);
-  this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
-
   var payload = {
     pddate:this.date_format,                                        
     shift:this.shift,
@@ -192,7 +215,32 @@ addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
   
 
   } 
-  this.loaddataTable(payload)
+
+  this.loadHoldDatatable(payload)  
+
+
+ 
+
+}
+
+addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
+  this._date = moment(event.value);
+  this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
+
+
+   
+  var payload = {
+    pddate:this.date_format,                                        
+    shift:this.shift,
+    wcno:this.wcno,
+    partno:this.partno,
+    cm:this.cm,
+    model:this.model,
+  
+
+  } 
+
+  this.loadHoldDatatable(payload)  
 
 }
 
@@ -205,16 +253,11 @@ onClickLogout(){
 
 toggle(status:string) {
   
- 
-
   if(status == "OK"){
     this.ischeck = true;
     this.ischeck2 = false;
     this.isHidden = true;
     this.frmQCsampling.controls['hold_qty'].setValue('0');
-    this.frmQCsampling.controls['ng'].setValue(false);
-    //this.subMit = this.wcno !== undefined ? false :true
-    
   }
 
   if(status == "NG"){
@@ -222,9 +265,6 @@ toggle(status:string) {
     this.ischeck2 = true;
     this.isHidden = false;
     this.frmQCsampling.controls['hold_qty'].setValue('0');
-    this.frmQCsampling.controls['ok'].setValue(false);
-
-    //this.subMit = true
   }
 
   
@@ -240,45 +280,39 @@ onBlurMethod(){
 }
 
 inputBarcode(data:string,pddate:string,shift:string){
-  this.keyboardInput = data
+  
+  this.qrcode = data
+  var payload = {
+    qrcode:data,
+    pddate:pddate,
+    shift:shift
 
-  //load data in text form
+  }
+
     this.route.queryParams.subscribe((param: any) => {
-      
-      var payload = {
-        qrcode:data,
-        pddate:pddate,
-        shift:shift
-
-      }
-
+      this.keyboardInput = data;
       this.SrvQcsamplingService.getQrcodeData(payload).subscribe((res: BarcodeDataInfoModule[]) => {
-        this.datapack = []
-         if(res.length > 0 ){
+       
+         if(res.length >0){
 
           this.frmBarcode.setValue({ barcode: '' });
 
-          this.datapack = res
-          this.frmQCsampling.setValue({ _pddate:this.date_format, 
-                                        _shift:this.shift,
-                                        wcno: res[0].wcno, 
-                                        partno: res[0].part_no, 
-                                        model: res[0].part_model, 
-                                        cm: res[0].cm == '' ? '-' : res[0].cm  , 
+
+          this.frmQCsampling.setValue({ _pddate:this.date_format, _shift:this.shift,
+                                        wcno: res[0].wcno, partno: res[0].part_no, 
+                                        model: res[0].part_model, cm: res[0].cm == '' ? '-' : res[0].cm  , 
                                         desc: res[0].description == '' ? '-' : res[0].description,
-                                        hold_qty : 0, 
-                                        ok: false,ng: false
+
                                       });
                                       
-                                      
+                                    
                                       this.wcno = res[0].wcno
                                       this.partno = res[0].part_no
                                       this.model = res[0].part_model
-                                      this.cm = res[0].cm    
-                                      this.total_stock = res[0].total
+                                      this.cm = res[0].cm
                                       
                                       var payload = {
-                                        pddate:this.date_format,
+                                        pddate:this.date_format,                                        
                                         shift:this.shift,
                                         wcno:this.wcno,
                                         partno:this.partno,
@@ -286,14 +320,13 @@ inputBarcode(data:string,pddate:string,shift:string){
                                         model:this.model,
                                       
                                 
-                                      }
+                                      }       
                                       
-                                  this.loaddataTable(payload)
                                         
-        
+                                      this.loadHoldDatatable(payload)          
                                                                   
       }else{
-        this.openDialogNotfound()
+        this.openDialogNotfound();
       }
 
 
@@ -302,35 +335,13 @@ inputBarcode(data:string,pddate:string,shift:string){
   });
 
 
-    //this.wcnof.nativeElement.focus();
 }
-
-loaddataTable(payload:any){
-  this.total_samling = 0;
-   this.route.queryParams.subscribe((param: any) => {
-    this.SrvQcsamplingService.getSamplingDataTable(payload).subscribe({
-      next:(res)=>{
-        console.log(res)
-        this.total_stock = res.totalQty 
-        this.dataSource = res.dt
-        if(this.dataSource.length > 0){
-          this.dataSource.forEach(element => {
-            this.total_samling += element.judgementQty
-          });
-        }else{
-          this.total_samling = 0;
-        }
-      }
-    })
-
-});          
-}
-
 
 reloadData(){
 
+  
   var payload = {
-    pddate:this.date_format,
+    pddate:this.date_format,                                        
     shift:this.shift,
     wcno:this.wcno,
     partno:this.partno,
@@ -338,45 +349,140 @@ reloadData(){
     model:this.model,
   
 
-  }
-
-  this.loaddataTable(payload)
-  this.route.queryParams.subscribe((param: any) => {
-
-
-});
+  }         
+  this.loadHoldDatatable(payload) 
+ 
 this.barcode.nativeElement.focus();
 
  this.frmQCsampling.controls['ok'].setValue(false)
  this.frmQCsampling.controls['ng'].setValue(false)
  this.frmQCsampling.controls['hold_qty'].setValue('0');
 
+
+}
+
+clear(){
+  this.searchValue = null;
 }
 
 
+loadHoldDatatable(payload:any){
+  this.route.queryParams.subscribe((param: any) => {
+    this.SrvQcsamplingService.getSamplingDataTableHold(payload).subscribe((dt: QcsamplingDataTable[]) => {
+  
+        if(dt){
 
-onSubmit()  {
-  this.SpinnerStatus = true
-  var values = this.frmQCsampling.value
+           this.rows = dt
 
-    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.name).subscribe((res: any) => {
-      if (res == 'OK') {
-          this.openDialog(true);
-      }
-      else{
-          this.openDialogWarning()
+        
+          }
 
-      }
 
-    })
-    this.barcode.nativeElement.focus();
+    });
+   
+
+  });
+  this.enableEdit = false;
+
+
+}
+
+enableEditMethod(e:any, i:any) {
+  this.hold_qty_new = 0;
+  this.hold_qty_old = 0;
+  this.hold_qty_total = 0;
+
+  this.enableEdit = true;
+  this.enableEditIndex = i;
+
+  
+  this.hold_qty_old =this.rows[i].judgementQty //ค่าเก่า
+
+
+  this.hold_qty_total = this.CalHoldQTY(i)
+
+
+ 
+  if( this.hold_qty_total  > this.hold_qty_old || this.hold_qty_total == 0){
+    
+    this.isCheckButton = true
+  }else{
+    this.isCheckButton = false
+  }
+  
+
+  console.log(i, e);
+}
+
+updateVal(newVal:any,rowIndex:number){
+  
+  this.hold_qty_new = 0;
+  this.hold_qty_old = 0;
+  this.hold_qty_total = 0;
+
+  this.hold_qty_old =this.rows[rowIndex].judgementQty //ค่าเก่า
+  this.hold_qty_new = newVal.target.value
+
+ 
+
+  this.hold_qty_total = this.CalHoldQTY(rowIndex)
+
+
+ 
+  if( this.hold_qty_total  > this.hold_qty_old || this.hold_qty_total == 0){
+    
+    this.isCheckButton = true
+  }else{
+    this.isCheckButton = false
+  }
+
+  
+
+
+  
+}
+
+CalHoldQTY(rowIndex:number){
+  if(this.rows[rowIndex].sub_table.length > 0){
+    console.log("มีค่า")
+    for(var val in this.rows[rowIndex].sub_table){
+      this.hold_qty_total += Number(this.rows[rowIndex].sub_table[val].hold_qty)
+ 
+   }
+    this.hold_qty_total += Number(this.hold_qty_new)
+
+  }else{
+    console.log("ไม่มีค่า")
+      this.hold_qty_total = this.hold_qty_new;
 
   }
 
+  return this.hold_qty_total
+}
+
+InsertHoldScrap(rowIndex : any,docno:string){
 
 
+  var payload = {
+    docno:docno,
+    hold_qty: this.hold_qty_new ,
+    emp:this.code,
+    pddate:this.date_format
+  }
 
+  this.SrvQcsamplingService.saveQCHoldScrapData(payload).subscribe((res: any) => {
+    if (res == 'OK') {
+        this.openDialog(true);
+    }
+    else{
+      //this.openDialog(false);
 
+    }
+
+  })
+
+ 
+}
 
 
 
@@ -394,14 +500,13 @@ openDialog(status: boolean) {
 
 
   } else {
-    
     Swal.fire({
       position: 'center',
       icon: 'success',
       title: 'ล้างข้อมูลสำเร็จ',
       showConfirmButton: false,
       timer: 1500
-    }).then(()=>this.ClearBarcode());
+    }).then(()=>this.Clear());
     this.isHidden = false;
 
 
@@ -412,35 +517,41 @@ openDialog(status: boolean) {
 
 
 openDialogWarning() {
+  // if (status) {
+  //   Swal.fire({
+  //     position: 'center',
+  //     icon: 'success',
+  //     title: 'บันทึกสำเร็จ',
+  //     showConfirmButton: false,
+  //     timer: 1500
+  //   });
+  //   this.isHidden = true;
+
+  // } else {
     Swal.fire({
       position: 'center',
       icon: 'error',
       title: 'บันทึกไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง',
       showConfirmButton: false,
-      timer: 1500
+      timer: 2000
     });
     this.isHidden = true;
-
-  
-  
-
-
 }
 
 
 openDialogNotfound() {
 
-  Swal.fire({
-    position: 'center',
-    icon: 'error',
-    title: 'ไม่พบข้อมูล กรุณาตรวจสอบ QRCDOE หรือ วันที่ อีกครั้ง',
-    showConfirmButton: false,
-    timer: 1500
-  }).then(()=>this.ClearBarcode());
-  this.isHidden = true;
+    Swal.fire({
+      position: 'center',
+      icon: 'error',
+      title: 'ไม่พบข้อมูล กรุณาตรวจสอบ QRCDOE หรือ เลือกวันที่ อีกครั้ง',
+      showConfirmButton: false,
+      timer: 1500
+    }).then(()=>this.Clear());
+    this.isHidden = true;
 
-
-
+  
+  
 
 
 }
@@ -454,47 +565,28 @@ getCurrentShif(){
     if(this.date.getHours() >= 8 && this.date.getHours() <= 20){
       this.selected = this.shift = "D"
       }else{
-        
-
         this.selected = this.shift = "N"
-
       }
 }
 
  
-ClearBarcode(){
-  this.wcno = ""
-  this.date_format =""
-  this.shift = ""
-  this.partno =""
-  this.cm =""
-  this.model =""
-  this.frmBarcode.reset();
-  this.ischeck2 = false;
-  this.isHidden = true;
-  this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
-  this.total_stock = 0
-  this.total_samling = 0
-  this.frmQCsampling.reset();
-  this.frmQCsampling.controls['_pddate'].setValue(moment())
-  this.frmQCsampling.controls['_shift'].setValue(this.selected)
-  this.barcode.nativeElement.focus();
-
- 
-}
-
-
 Clear(){
-
-    this.openDialog(false)
-
+   
+    this.frmBarcode.reset();
+    //this.frmQCsampling.reset();
+    // this.frmQCsampling.controls['_pddate'].setValue(moment())
+    // this.frmQCsampling.controls['_shift'].setValue(this.selected)
+    this.barcode.nativeElement.focus();
 
  
 }
+
+
+
+
 //   //this.router.navigate(['/', 'course']);
 
 
 
 }
-
 

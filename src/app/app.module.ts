@@ -42,8 +42,10 @@ import { MatTooltipModule } from '@angular/material/tooltip'
 import { MatSidenavModule } from '@angular/material/sidenav'
 import { HideKeyboardModule } from 'hide-keyboard';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
+import {MatListModule} from '@angular/material/list';
+import { HoldComponent } from './Components/hold/hold.component'
+import { MatTableModule } from '@angular/material/table';
 
-  
 @NgModule({
   declarations: [
 
@@ -51,9 +53,12 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
     HeaderComponent,
     FooterComponent,
     HomeComponent,
-    LoginComponent
+    LoginComponent,
+    HoldComponent
   ],
   imports: [
+    MatTableModule,
+    MatListModule,
     MatProgressSpinnerModule,
     HideKeyboardModule,
     MatSidenavModule,
@@ -84,7 +89,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
     MatDialogModule,
     NgbModule
   ],
-  providers: [CookieService,DatePipe,AuthenUserGuard,AuthenService,{provide:LocationStrategy,useClass:HashLocationStrategy} ],
+  providers: [MatIconModule,CookieService,DatePipe,AuthenUserGuard,AuthenService,{provide:LocationStrategy,useClass:HashLocationStrategy} ],
   bootstrap: [AppComponent],
   
 })
