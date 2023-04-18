@@ -20,7 +20,7 @@
          
           <mat-form-field id="barcode-input-focus"  appearance="outline" [style.width.%]="130" 
             [ngClass]="{'barcode-input-blur': (isBlur == false) , 'barcode-input-focus': isBlur == true}">
-            <mat-label>INPUT BARCODE</mat-label>
+            <mat-label>SCAN BARCODE</mat-label>
             <input hideKeyboard #barcode formControlName="barcode" matInput type="text" autocomplete="off"
             *ngIf="isFocus"  type="text" autofocus 
             (keyup.enter)="inputBarcode(barcode.value,date_format,shift.value)"
@@ -114,21 +114,21 @@
                 <div class="table-header table-row">
                   <div class="td"></div>
                   <div class="td">TIME</div>
-                  <div class="td">QTY</div>
+                  <div class="td">HOLD QTY</div>
                   <div class="td">ACTION</div>
                 </div>
                 <div class="table-row" *ngFor="let row of rows ; let rowIndex = index">
-                
+             
                     <div class="td" [class.clickable]="isRowClickable(rowIndex)" (click)="expanded[row.docno] = !expanded[row.docno]">
                       <span  *ngIf="isRowClickable(rowIndex)">
                         <span *ngIf="expanded[row.docno]">-</span>
                         <span *ngIf="!expanded[row.docno]">+</span>
                       </span>
                     </div>
-                    <div class="td fix2">{{row.pddate}}</div>
+                    <div class="td fix2">{{row.inspectionDate}}</div>
                     <div class="td">
 
-                      <div *ngIf="enableEdit && enableEditIndex == rowIndex; else showdata">
+                      <div *ngIf="enableEdit && enableEditIndex == rowIndex; else showdata" >
                
                         ยอด HOLD ตั้งต้น &nbsp; <input matInput  type="number" [value]="row.judgementQty" >
                        <hr>
@@ -137,11 +137,11 @@
                         ยอดHOLD คงเหลือ<input matInput  type="number"  [value]="row.judgementQty - hold_qty_total" >
                         <hr>
                         <mat-form-field class="w-10"  >
-                            <input matInput  type="number" 
+                            <input matInput type="number" 
                             #holdqty
                             [value]="0"
                             (keyup)="updateVal($event,rowIndex)"
-                       
+                            (keypress)="keyPress($event)"                     
                             autocomplete="off"
                             style="background-color: #faffb3;"
                             >
@@ -185,8 +185,8 @@
                       <thead>
                         <tr>
                           <th scope="col">TIME</th>
-                          <th scope="col">HOLD</th>
-                          <th scope="col">CBY</th>
+                          <th scope="col">UNHOLD</th>
+                          <th scope="col">BY</th>
                         </tr>
                       </thead>
                       <tbody>

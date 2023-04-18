@@ -40,7 +40,7 @@ export class AuthenService {
         })
         .pipe(
           map((response: any) => {
-           
+            console.log("catch")
             if (response.ok) {
                 this.cookies.set('user_info', JSON.stringify(response.body[0]), 2);   /// session expired 2 day
                 return response.body[0];

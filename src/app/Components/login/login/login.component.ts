@@ -83,15 +83,16 @@ export class LoginComponent {
   }
 
   ClickSubmit(){
-    console.log(this.QueryLink)
     if (this.loginForm.invalid) {
 
       Swal.fire("Fail","กรุณากรอกให้ครบ!!","warning");
 
 
     } else {
-      this.authService.Login(this.loginForm.value).subscribe((result: boolean ) => {
-            if (result) {
+      this.authService.Login(this.loginForm.value).subscribe({
+        next:(res)=>{
+          console.log(res)
+          if (res) {
     
             this.route.navigate([
                   this.QueryLink == undefined ? 'home' : this.QueryLink,
@@ -112,10 +113,13 @@ export class LoginComponent {
             });
 
           }
-          else {
-            Swal.fire("OK","ชื่อผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง !!!","warning");
-          }
+         
+        },error:(err)=>{
+          console.log(err)
+          Swal.fire("FAIL","คุณไม่มีสิทธิ์เข้าระบบ ต้องเป็นหน่วยงาน QC เท่านั้น","warning");
+
         }
+      }
 
       );
 

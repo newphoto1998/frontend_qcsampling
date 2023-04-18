@@ -212,3 +212,78 @@ font-size: 18px;
 }
 
 
+.frmLine .mat-card-header-text {
+  /* margin: 0 16px; */
+  font-size: 10px;
+  text-align: left;
+  padding: 0px;
+  /* width: 100%; */
+  /* background-color: red; */
+  justify-content: end;
+  display: flex;
+}
+.frmLine mat-card{
+  padding: 0px;
+}
+
+::ng-deep .frmLine .mat-card-header-text {
+  /* CSS styles go here */
+  margin: 10px; 
+}
+
+/* .frmLine .mat-card-title .title-left{
+  font-size: 12px;
+    text-align: right;
+    justify-content: start;
+    display: flex;
+    margin-bottom: 0px;
+}
+
+.frmLine .mat-card-title .title-right{
+  font-size: 12px;
+    text-align: right;
+    justify-content: start;
+    display: flex;
+    margin-bottom: 0px;
+} */
+.frmLine .mat-card-title button{
+  padding: 0px;
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+  
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+  
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+  
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+  }
+
+.frmLine .mat-card-content{
+  padding: 20px;
+}
+
+
+
+
+
+
+
+
+

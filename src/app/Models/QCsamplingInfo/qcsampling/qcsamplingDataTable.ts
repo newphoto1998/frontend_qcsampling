@@ -10,7 +10,7 @@ export class QcsamplingDataTable{
     ng !:boolean
     shift !:string
     pddate !:string
-    inspectiondate !:string
+    inspectionDate !:string
     judgementResult !:string
     judgementQty !:number
 

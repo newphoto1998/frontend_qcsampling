@@ -5,6 +5,8 @@ import { map, Observable } from 'rxjs';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
 import { QcsamplingDataTable } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTable';
 import { QcsamplingDataTableHold } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTableHold';
+import { LineProcessInfoModule,MainProcessInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/lineprocessinfo';
+
 
 @Injectable({
   providedIn: 'root'
@@ -37,25 +39,29 @@ export class SrvQcsamplingService {
 }
 
 
+getMainline(partno:string){
+  return this.http.get(`${this.config.server_api}/api/QCSampling/getMainLinePC/${partno}`).pipe(
+    map((response: any) =>
+      response.map((item: MainProcessInfoModule) => item)
+    )
+  );
+}
+
+getSubine(payload:any){
+  return this.http.post<any>(`${this.config.server_api}/api/QCSampling/getSubLinePC`,payload);
+
+}
+
+getStdINSubine(payload:any){
+  return this.http.post<any>(`${this.config.server_api}/api/QCSampling/getStdSubLinePC`,payload);
+
+}
+
+
+
 
 getSamplingDataTable(payload:any){
-  // return this.http
-  // .post<any>(`${this.config.server_api}/api/QCSampling/getSamplingDataTables`,payload, {
-  //   observe: 'response',
-  //   responseType: 'json',
-  //   headers: this.headers,
-  // })
-  // .pipe(
-  //   map((res: any) => {
 
-
-  //     if (res) {
-  //       return res.body;
-  //     } else {
-  //       return;
-  //     }
-  //   })
-  // );
   return this.http.post<any>(`${this.config.server_api}/api/QCSampling/getSamplingDataTables`,payload);
 
 
@@ -82,6 +88,11 @@ getSamplingDataTableHold(payload:any){
 
 }
 
+getLineProcessDataTable(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/getLineProcessDataTable`, payload);
+
+}
+
 
 
   saveQCsamplingData(payload:any,date_format:string,codename:string){
@@ -97,6 +108,18 @@ getSamplingDataTableHold(payload:any){
   return this.http.post(this.config.server_api + `/api/QCSampling/SaveHoldScrapData`, payload);
 
 }
+
+
+saveQCLineProcess(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/saveQCLineProcess`, payload);
+
+}
+
+getStatusCheckDataPicker(ym:string){
+  return this.http.get(this.config.server_api + `/api/QCSampling/statusDatePicker/`+ ym,);
+
+}
+
 }
 
 

@@ -6,6 +6,7 @@ import { DatePipe } from '@angular/common'
 import { SrvQcsamplingService } from 'src/app/Middleware/Services/srv-qcsampling.service';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
 import { QcsamplingDataTable } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTable';
+import { DataTableLineProcessModule, DataTableSubLineProcessModule, LineProcessInfoModule,MainProcessInfoModule,SubProcessInfoModule} from 'src/app/Models/QCsamplingInfo/qcsampling/lineprocessinfo'
 import Swal from 'sweetalert2';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -75,13 +76,16 @@ user_info :UserLoginInfo = this.authService.getUserInfo();
 code = this.user_info.code
 name = this.user_info.name
 fullname = this.user_info.fullname
-
-
+std !:string
+collapsed = true;
 rateInput !:number
 SpinnerStatus = false
 payload !:any
 dataSource: QcsamplingDataTable[] = [];
+list_mainpc: MainProcessInfoModule[] = [];
+list_subpc: SubProcessInfoModule[] = [];
 frmQCsampling!: FormGroup;
+frmLinepc !:FormGroup
 frmBarcode!:FormGroup;
 ischeck !: boolean;
 ischeck2 !: boolean;
@@ -105,12 +109,15 @@ date !: Date
 selected !: string
 minDate !: Date
 maxDate !: Date
-
-
+RunningNumber = ""
+main_line = ""
+checkInvaild = true
+checkLineProcess = false
+rows : DataTableLineProcessModule[] = []
+sub_rows : DataTableSubLineProcessModule[] = []
+isClose = false
 
 ngOnInit(): void {
-
-
 
     this._date = moment().utc()
     this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
@@ -132,6 +139,24 @@ ngOnInit(): void {
     });
 
     this.frmBarcode = this.formBulid.group({ barcode:[''] });
+
+    this.frmLinepc = this.formBulid.group({
+      main_line : ['',Validators.required],
+      sub_line : ['',Validators.required],
+      act : ['',Validators.required],
+      nbr:[''],
+      std:['']
+ 
+    });
+    this.frmLinepc.valueChanges.subscribe(data=>{
+      if(this.frmLinepc.controls['main_line'].value && this.frmLinepc.controls['sub_line'].value && this.frmLinepc.controls['act'].value
+        && this.frmLinepc.controls['std'].value){
+          this.checkInvaild = false;
+      }else{
+        this.checkInvaild = true
+      }
+    })
+
     this.frmQCsampling.valueChanges.subscribe(data=>{
       if(data.ok && this.datapack.length){
         this.subMit = false;
@@ -145,24 +170,96 @@ ngOnInit(): void {
           }else{
             this.subMit = data.hold_qty > 0 && data.hold_qty <= this.total_stock  ? false : true
 
-
           }
+        }else{
+          this.subMit = true
         }
         
 
       }
     })
 
+    this.getCheckIsCloseDatepicker(this._date.format('yyyy') + this._date.format('MM'))
+
+
+}
+
+getCheckIsCloseDatepicker(ym:string){
+  
+  this.SrvQcsamplingService.getStatusCheckDataPicker(ym).subscribe((res:any) => {
+   
+    this.isClose = res
+    console.log(this.isClose + '' + ym)
+  })
+
+}
+
+onSelectMainline(event:any){
+  //this.main_line = ""
+  this.payload ={
+    partno:this.partno,
+    main_line_process:event.value
+  }
+  this.SrvQcsamplingService.getSubine(this.payload).subscribe((res:any) => {
+    if(res)
+    {
+      this.list_subpc = res
+    }
+  
+  })
+  this.frmLinepc.controls['std'].setValue('') 
+  this.frmLinepc.controls['sub_line'].setValue(this.list_subpc[0]) 
+  
 }
 
 
 
+onSelectSubline(event:any,main:string){
+  
+  if(main == null){
+    this.main_line = this.list_mainpc[0]['main_line_process']
+  }else{
+    this.main_line = main
+  }
+  
+  
+  this.payload ={
+    partno:this.partno,
+    main_line_process:this.main_line,
+    sub_line_process :event.value
+  }
+  this.SrvQcsamplingService.getStdINSubine(this.payload).subscribe((res:any) => {
+   
+      this.std = res.result
+     
+    
+      this.frmLinepc.controls['std'].setValue(this.std) 
+
+    
+  
+  })
+}
+
+
+
+
+keyPress(event:any): boolean {    
+  let patt = /^([0-9])$/;
+  let result = patt.test(event.key);
+  return result;
+}
+
+
 changeClient(vale:string){
   this.shift = vale
-  if(this.shift == "N"){
-    var ndate =  this.date.setDate(this.date.getDate() - 1);
-    this.frmQCsampling.controls['_pddate'].setValue(moment(ndate)) 
-  }
+  // if(this.shift == "N"){
+  //   //console.log(moment(this.date_format,'YYYY-MM-DD').add('-1','days').format('YYYY-MM-DD'))
+  //   //this._date =  this.date.setDate(moment(this.date.getDate() - 1));
+    
+  //   this.date_format = moment(this.date_format,'YYYY-MM-DD').add('-1','days').format('YYYY-MM-DD')
+  //   this.frmQCsampling.controls['_pddate'].setValue(this.date_format) 
+
+  // }
 
   var payload = {
     pddate:this.date_format,                                        
@@ -181,6 +278,17 @@ changeClient(vale:string){
 addEvent(type: string, event: MatDatepickerInputEvent<Date>) {
   this._date = moment(event.value);
   this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
+
+  this.getCheckIsCloseDatepicker(this._date.format('yyyy') + this._date.format('MM'))
+  // console.log(this.isClose)
+  // if(this.isClose){
+  //   this.minDate = new Date(2023,2,1)
+  //   this.maxDate = new Date(2023,2,5)
+  // }else{
+  //   const currentYear = new Date().getFullYear();
+  //   this.minDate = new Date(currentYear - 20, 0, 1);
+  //   this.maxDate = new Date(currentYear + 1, 11, 31);
+  // }
 
   var payload = {
     pddate:this.date_format,                                        
@@ -253,7 +361,7 @@ inputBarcode(data:string,pddate:string,shift:string){
       }
 
       this.SrvQcsamplingService.getQrcodeData(payload).subscribe((res: BarcodeDataInfoModule[]) => {
-        this.datapack = []
+    
          if(res.length > 0 ){
 
           this.frmBarcode.setValue({ barcode: '' });
@@ -269,8 +377,7 @@ inputBarcode(data:string,pddate:string,shift:string){
                                         hold_qty : 0, 
                                         ok: false,ng: false
                                       });
-                                      
-                                      
+                                                                           
                                       this.wcno = res[0].wcno
                                       this.partno = res[0].part_no
                                       this.model = res[0].part_model
@@ -310,7 +417,6 @@ loaddataTable(payload:any){
    this.route.queryParams.subscribe((param: any) => {
     this.SrvQcsamplingService.getSamplingDataTable(payload).subscribe({
       next:(res)=>{
-        console.log(res)
         this.total_stock = res.totalQty 
         this.dataSource = res.dt
         if(this.dataSource.length > 0){
@@ -354,28 +460,137 @@ this.barcode.nativeElement.focus();
 }
 
 
+reloadDataLineProcess(){
+  
+  var payload = {
+    nbr:this.frmLinepc.controls['nbr'].value,
+    main_line : this.frmLinepc.controls['main_line'].value,
+    sub_line :this.frmLinepc.controls['sub_line'].value
+  }
+  
+  this.main_line =this.frmLinepc.controls['main_line'].value
+  this.route.queryParams.subscribe((param: any) => {
+    this.SrvQcsamplingService.getLineProcessDataTable(payload).subscribe((dt:any) => {
+  
+      if(dt){
+         
+         this.rows = dt
+         //dt.sub_line
+
+      
+        }
+
+
+  });
+
+});  
+}
+
+
 
 onSubmit()  {
-  this.SpinnerStatus = true
-  var values = this.frmQCsampling.value
 
-    this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.name).subscribe((res: any) => {
-      if (res == 'OK') {
-          this.openDialog(true);
-      }
-      else{
-          this.openDialogWarning()
+  if(!this.isClose){
+    this.SpinnerStatus = true
+    var values = this.frmQCsampling.value
 
-      }
+      this.SrvQcsamplingService.saveQCsamplingData(values,this.date_format,this.name).subscribe((res: any) => {
+        if (res) {
+            this.openDialog(true);
+            if(values.ng == true){
+              this.checkLineProcess = true
+            }
+            else{
+              this.checkLineProcess = false
+            }
+            this.frmLinepc.controls['nbr'].setValue(res.nbr)
+          //this.RunningNumber = res.nbr
 
-    })
-    this.barcode.nativeElement.focus();
+        }
+        else{
+            this.openDialogWarning()
+
+        }
+
+      })
+      this.barcode.nativeElement.focus();
+      this.rows = []
+
+      this.loadDataLineProcess()
+    }
+    else{
+      this.openDialogCheckDatepicker()
+    }
 
   }
 
+  loadDataLineProcess(){
+    this.SrvQcsamplingService.getMainline(this.partno).subscribe((res:any) =>{
+      if(res){
+        this.list_mainpc = res
+        this.frmLinepc.controls['main_line'].setValue(this.list_mainpc[0]['main_line_process']);
+       
+       
+        this.payload ={
+          partno:this.partno,
+          main_line_process:this.list_mainpc[0]['main_line_process']
+        }
+        this.SrvQcsamplingService.getSubine(this.payload).subscribe((res:any) => {
+          if(res)
+          {
+            this.list_subpc = res
+            this.std = this.list_subpc[0]['sub_std']
+            this.frmLinepc.controls['std'].setValue(this.list_subpc[0]['sub_std'])
+            this.frmLinepc.controls['sub_line'].setValue(this.list_subpc[0]['sub_line_process']) 
+          }
+        
+        })
+       
+       
+      }
+     
+    })
+  }
 
 
+  onSubmitLinePC(values: any){
+   
+      if(this.frmLinepc.valid){
+        values.std = values.std.toString()
+          this.SrvQcsamplingService.saveQCLineProcess(values).subscribe((res:any) => {
+            if(!res.duplicate){
+               this.duplicate(false);
+            }else{
+               this.duplicate(true)
+            }
+          })
 
+      }
+  }
+
+
+duplicate(status: boolean){
+  if (!status) {
+    Swal.fire({
+      position: 'center',
+      icon: 'success',
+      title: 'บันทึกสำเร็จ',
+      showConfirmButton: false,
+      timer: 1500
+    }).then(()=>this.reloadDataLineProcess());
+    //this.isHidden = true;
+  }
+  else{
+    Swal.fire({
+      position: 'center',
+      icon: 'error',
+      title: 'มีข้อมูลซ้ำกัน',
+      showConfirmButton: false,
+      timer: 1500
+    })
+    //this.isHidden = false;
+  }
+}
 
 
 
@@ -428,6 +643,23 @@ openDialogWarning() {
 }
 
 
+openDialogCheckDatepicker() {
+  Swal.fire({
+    position: 'center',
+    icon: 'error',
+    title: 'ไม่สามารถบันทึกได้ เนื่องจากวันที่ดังกล่าวมีการปิดบัญชีไปแล้ว',
+    showConfirmButton: false,
+    timer: 3000
+  });
+  this.isHidden = true;
+
+
+
+
+
+}
+
+
 openDialogNotfound() {
 
   Swal.fire({
@@ -449,8 +681,15 @@ openDialogNotfound() {
 
 getCurrentShif(){
     this.date = new Date();  
-    this.minDate = new Date(this.date.getFullYear(),this.date.getMonth(),1)
-    this.maxDate = new Date(this.date.getFullYear(),this.date.getMonth(),this.date.getDate())
+    // if(this.isClose){
+    //   this.minDate = new Date(this.date.getFullYear(),this.date.getMonth(),1)
+    //   this.maxDate = new Date(this.date.getFullYear(),this.date.getMonth(),this.date.getDate())
+    // }else{
+    //   const currentYear = new Date().getFullYear();
+    //   this.minDate = new Date(currentYear - 20, 0, 1);
+    //   this.maxDate = new Date(currentYear + 1, 11, 31);
+    // }
+  
     if(this.date.getHours() >= 8 && this.date.getHours() <= 20){
       this.selected = this.shift = "D"
       }else{
@@ -463,21 +702,31 @@ getCurrentShif(){
 
  
 ClearBarcode(){
+  this.datapack = []
+  this.rows = []
+  //this.frmLinepc.reset();
+  this.frmBarcode.reset();
+  this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
+  this.frmQCsampling.reset();
+  this.frmQCsampling.controls['_pddate'].setValue(this.date_format)
+  this.frmQCsampling.controls['_shift'].setValue("D")  
   this.wcno = ""
-  this.date_format =""
-  this.shift = ""
+  this.std = ""
+  this.frmLinepc.reset()
+  //this.shift = ""
+  //this.date_format =""
+  //this.main_line = ""
   this.partno =""
   this.cm =""
   this.model =""
-  this.frmBarcode.reset();
   this.ischeck2 = false;
+  this.checkLineProcess = false
   this.isHidden = true;
-  this.dataSource = this.dataSource.filter(elem => elem.judgementResult === 'AA');
+
   this.total_stock = 0
   this.total_samling = 0
-  this.frmQCsampling.reset();
-  this.frmQCsampling.controls['_pddate'].setValue(moment())
-  this.frmQCsampling.controls['_shift'].setValue(this.selected)
+ 
+  
   this.barcode.nativeElement.focus();
 
  

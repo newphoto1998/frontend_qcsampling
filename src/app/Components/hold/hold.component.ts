@@ -155,7 +155,6 @@ qrcode !: string
 ngOnInit(): void {
     this._date = moment().utc()
     this.date_format = this._date.format('yyyy') + '-' + this._date.format('MM') + '-' + this._date.format('DD')
-
     this.getCurrentShif();
 
     this.isFocus = !this.isFocus;
@@ -167,6 +166,7 @@ ngOnInit(): void {
       model:['',Validators.required],
       cm: [''],
       desc: [''],
+      
 
     });
 
@@ -205,6 +205,15 @@ isRowClickable(rowIndex: number): any  {
 
 changeClient(vale:string){
   this.shift = vale
+
+  // if(this.shift == "N"){
+  //   //console.log(moment(this.date_format,'YYYY-MM-DD').add('-1','days').format('YYYY-MM-DD'))
+  //   //this._date =  this.date.setDate(moment(this.date.getDate() - 1));
+    
+  //   this.date_format = moment(this.date_format,'YYYY-MM-DD').add('-1','days').format('YYYY-MM-DD')
+  //   this.frmQCsampling.controls['_pddate'].setValue(this.date_format) 
+
+  // }
   var payload = {
     pddate:this.date_format,                                        
     shift:this.shift,
@@ -279,6 +288,12 @@ onBlurMethod(){
   this.isBlur = false
 }
 
+keyPress(event:any): boolean {    
+  let patt = /^([0-9])$/;
+  let result = patt.test(event.key);
+  return result;
+}
+
 inputBarcode(data:string,pddate:string,shift:string){
   
   this.qrcode = data
@@ -301,7 +316,8 @@ inputBarcode(data:string,pddate:string,shift:string){
           this.frmQCsampling.setValue({ _pddate:this.date_format, _shift:this.shift,
                                         wcno: res[0].wcno, partno: res[0].part_no, 
                                         model: res[0].part_model, cm: res[0].cm == '' ? '-' : res[0].cm  , 
-                                        desc: res[0].description == '' ? '-' : res[0].description,
+                                        desc: res[0].description == '' ? '-' : res[0].description
+                                       
 
                                       });
                                       
@@ -354,9 +370,9 @@ reloadData(){
  
 this.barcode.nativeElement.focus();
 
- this.frmQCsampling.controls['ok'].setValue(false)
- this.frmQCsampling.controls['ng'].setValue(false)
- this.frmQCsampling.controls['hold_qty'].setValue('0');
+//  this.frmQCsampling.controls['ok'].setValue(false)
+//  this.frmQCsampling.controls['ng'].setValue(false)
+//  this.frmQCsampling.controls['hold_qty'].setValue('0');
 
 
 }
@@ -444,7 +460,6 @@ updateVal(newVal:any,rowIndex:number){
 
 CalHoldQTY(rowIndex:number){
   if(this.rows[rowIndex].sub_table.length > 0){
-    console.log("มีค่า")
     for(var val in this.rows[rowIndex].sub_table){
       this.hold_qty_total += Number(this.rows[rowIndex].sub_table[val].hold_qty)
  
@@ -452,7 +467,6 @@ CalHoldQTY(rowIndex:number){
     this.hold_qty_total += Number(this.hold_qty_new)
 
   }else{
-    console.log("ไม่มีค่า")
       this.hold_qty_total = this.hold_qty_new;
 
   }
