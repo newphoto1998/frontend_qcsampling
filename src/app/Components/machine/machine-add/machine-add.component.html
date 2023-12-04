@@ -1,0 +1,43 @@
+
+<div class="my-3"><span class="title" style="font-size: 20px;">{{TitleCore}}</span></div>
+<mat-card>
+    <form [formGroup]="coreFrmGroup" #formDirective="ngForm" (submit)="onSubmit(coreFrmGroup.value,formDirective)">
+      <mat-card-content class="p-6">
+
+            <div class="row">
+              <div class="col-5 col-sm-3">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>WCNO</mat-label>
+                    <mat-select formControlName="wcno" (selectionChange)="onChanegeSelect($event)" required #WCNO >
+                        <mat-option [value]="item.wcno" *ngFor="let item of wcno" >{{item.wcno}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+              </div>
+               <div class="col-7 col-sm-3">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>PROCESS</mat-label>
+                    <mat-select formControlName="main_process" required >
+                        <mat-option [value]="item.process" *ngFor="let item of process" >{{item.process}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="rows">
+              <div class="col-12">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>Machine</mat-label>
+                    <input formControlName="machine" matInput type="text" required />
+                </mat-form-field>
+              </div>
+            
+            </div>
+
+            
+        </mat-card-content>
+        <div class="d-flex justify-content-end">
+            <button type="button" (click)="onClickCancel()" class="btn btn-danger me-2">ยกเลิก</button>
+            <button  type="submit" class="btn btn-primary " [ngClass]="{'disabled': formDirective.invalid}">บันทึก</button>
+        </div>
+    </form>
+</mat-card>

@@ -1,3 +1,4 @@
+import { Wcno } from './../../Models/QCsamplingInfo/qcsampling/machineInfo';
 // import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild ,AfterViewInit} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormGroupDirective, MinValidator, Validators } from '@angular/forms';
@@ -6,7 +7,7 @@ import { DatePipe } from '@angular/common'
 import { SrvQcsamplingService } from 'src/app/Middleware/Services/srv-qcsampling.service';
 import { BarcodeDataInfoModule } from 'src/app/Models/QCsamplingInfo/qcsampling/barcodeDataInfo';
 import { QcsamplingDataTable } from 'src/app/Models/QCsamplingInfo/qcsampling/qcsamplingDataTable';
-import { DataTableLineProcessModule, DataTableSubLineProcessModule, LineProcessInfoModule,MainProcessInfoModule,SubProcessInfoModule} from 'src/app/Models/QCsamplingInfo/qcsampling/lineprocessinfo'
+import { DataTableLineProcessModule, DataTableSubLineProcessModule, LineProcessInfoModule,MainProcessInfoModule,SubProcessInfoModule,Machine} from 'src/app/Models/QCsamplingInfo/qcsampling/lineprocessinfo'
 import Swal from 'sweetalert2';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -84,6 +85,7 @@ payload !:any
 dataSource: QcsamplingDataTable[] = [];
 list_mainpc: MainProcessInfoModule[] = [];
 list_subpc: SubProcessInfoModule[] = [];
+list_machine : Machine[] = [];
 frmQCsampling!: FormGroup;
 frmLinepc !:FormGroup
 frmBarcode!:FormGroup;
@@ -98,7 +100,7 @@ wcno !:string;
 partno !:string;
 cm !: string;
 model !: string
-total_stock  = 0;
+total_stock !:number;
 total_samling = 0
 remain_sampling = 0
 isFocus :boolean = false;
@@ -143,13 +145,14 @@ ngOnInit(): void {
     this.frmLinepc = this.formBulid.group({
       main_line : ['',Validators.required],
       sub_line : ['',Validators.required],
+      machine : [''],
       act : ['',Validators.required],
       nbr:[''],
       std:['']
  
     });
     this.frmLinepc.valueChanges.subscribe(data=>{
-      if(this.frmLinepc.controls['main_line'].value && this.frmLinepc.controls['sub_line'].value && this.frmLinepc.controls['act'].value
+      if(this.frmLinepc.controls['main_line'].value &&  this.frmLinepc.controls['sub_line'].value && this.frmLinepc.controls['act'].value
         && this.frmLinepc.controls['std'].value){
           this.checkInvaild = false;
       }else{
@@ -198,7 +201,7 @@ onSelectMainline(event:any){
   //this.main_line = ""
   this.payload ={
     partno:this.partno,
-    main_line_process:event.value
+    main_process:event.value
   }
   this.SrvQcsamplingService.getSubine(this.payload).subscribe((res:any) => {
     if(res)
@@ -207,17 +210,39 @@ onSelectMainline(event:any){
     }
   
   })
+
+  this.payload ={
+    wcno:this.wcno,
+    partno:this.partno,
+    main_process:event.value
+   
+  }
+  
+  this.SrvQcsamplingService.getMachine(this.payload).subscribe((res:any) => {
+    
+    if(res)
+    {
+      this.list_machine = res
+ 
+      this.frmLinepc.controls['machine'].setValue(this.list_machine[0]) 
+   
+    }
+
+
+    
+  
+  })
   this.frmLinepc.controls['std'].setValue('') 
-  this.frmLinepc.controls['sub_line'].setValue(this.list_subpc[0]) 
+  // this.frmLinepc.controls['machine'].setValue(this.wcno) 
+    this.frmLinepc.controls['sub_line'].setValue(this.list_subpc[0]) 
   
 }
-
 
 
 onSelectSubline(event:any,main:string){
   
   if(main == null){
-    this.main_line = this.list_mainpc[0]['main_line_process']
+    this.main_line = this.list_mainpc[0]['main_process']
   }else{
     this.main_line = main
   }
@@ -225,14 +250,12 @@ onSelectSubline(event:any,main:string){
   
   this.payload ={
     partno:this.partno,
-    main_line_process:this.main_line,
-    sub_line_process :event.value
+    main_process:this.main_line,
+    sub_process :event.value
   }
   this.SrvQcsamplingService.getStdINSubine(this.payload).subscribe((res:any) => {
    
-      this.std = res.result
-     
-    
+      this.std = res.result 
       this.frmLinepc.controls['std'].setValue(this.std) 
 
     
@@ -240,11 +263,15 @@ onSelectSubline(event:any,main:string){
   })
 }
 
+keyPress_QTY(event:any): boolean {    
+  let patt = /^[1-9]*?[0-9]*$/;
+  let result = patt.test(event.key);
+  return result;
+}
 
 
-
-keyPress(event:any): boolean {    
-  let patt = /^([0-9])$/;
+keyPress_ACT(event:any): boolean {    
+  let patt = /^[0-9]*\.?[0-9]*$/;
   let result = patt.test(event.key);
   return result;
 }
@@ -361,10 +388,12 @@ inputBarcode(data:string,pddate:string,shift:string){
       }
 
       this.SrvQcsamplingService.getQrcodeData(payload).subscribe((res: BarcodeDataInfoModule[]) => {
-    
-         if(res.length > 0 ){
+         
 
+         if(res.length > 0){
+      
           this.frmBarcode.setValue({ barcode: '' });
+         
 
           this.datapack = res
           this.frmQCsampling.setValue({ _pddate:this.date_format, 
@@ -383,7 +412,6 @@ inputBarcode(data:string,pddate:string,shift:string){
                                       this.model = res[0].part_model
                                       this.cm = res[0].cm    
                                       this.total_stock = res[0].total
-                                      
                                       var payload = {
                                         pddate:this.date_format,
                                         shift:this.shift,
@@ -391,6 +419,7 @@ inputBarcode(data:string,pddate:string,shift:string){
                                         partno:this.partno,
                                         cm:this.cm,
                                         model:this.model,
+                                      
                                       
                                 
                                       }
@@ -528,20 +557,32 @@ onSubmit()  {
     this.SrvQcsamplingService.getMainline(this.partno).subscribe((res:any) =>{
       if(res){
         this.list_mainpc = res
-        this.frmLinepc.controls['main_line'].setValue(this.list_mainpc[0]['main_line_process']);
+        console.log(res)
+        this.frmLinepc.controls['main_line'].setValue(this.list_mainpc[0]['main_process']);
        
        
         this.payload ={
+          wcno:this.wcno,
           partno:this.partno,
-          main_line_process:this.list_mainpc[0]['main_line_process']
+          main_process:this.list_mainpc[0]['main_process']
         }
+
+        this.SrvQcsamplingService.getMachine(this.payload).subscribe((res:any) => {
+          if(res)
+          {
+            this.list_machine = res    
+            this.frmLinepc.controls['machine'].setValue(this.list_machine[0]['machine']) 
+          }
+        
+        })
+
         this.SrvQcsamplingService.getSubine(this.payload).subscribe((res:any) => {
           if(res)
           {
             this.list_subpc = res
             this.std = this.list_subpc[0]['sub_std']
             this.frmLinepc.controls['std'].setValue(this.list_subpc[0]['sub_std'])
-            this.frmLinepc.controls['sub_line'].setValue(this.list_subpc[0]['sub_line_process']) 
+            this.frmLinepc.controls['sub_line'].setValue(this.list_subpc[0]['sub_process']) 
           }
         
         })
@@ -665,7 +706,7 @@ openDialogNotfound() {
   Swal.fire({
     position: 'center',
     icon: 'error',
-    title: 'ไม่พบข้อมูล กรุณาตรวจสอบ QRCDOE หรือ วันที่ อีกครั้ง',
+    title: 'ไม่พบข้อมูล Drawing นี้ในระบบ',
     showConfirmButton: false,
     timer: 1500
   }).then(()=>this.ClearBarcode());
@@ -740,10 +781,42 @@ Clear(){
 
  
 }
+
+
+DeleteLine(nbr:string,process:string,point:string){
+
+  let payload ={
+    nbr:nbr,
+    main_line:process,
+    sub_line :point
+  }
+
+  Swal.fire({
+    title: 'ยืนยันการลบข้อมูล?',
+    text: "คุณต้องการลบข้อมูล ใช่หรือไม่!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก'
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      this.SrvQcsamplingService.deleteQCLineProcess(payload).subscribe((result:any)=>
+      {          
+        if(result.status){
+          Swal.fire("Successful","ลบข้อมูลสำเร็จ","success").then((()=>this.reloadDataLineProcess()));
+        }
+      });
+    }
+  });
+}
+}
 //   //this.router.navigate(['/', 'course']);
 
 
 
-}
+
 
 

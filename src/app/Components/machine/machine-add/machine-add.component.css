@@ -1,0 +1,57 @@
+::ng-deep .mat-card-header-text {
+    width: 100%;
+  }
+  
+  [type="file"] {
+    display: none;
+  }
+  
+  .title-preview>div span {
+    font-size: 25px;
+    font-weight: bold;
+    color: black;
+  }
+  .title {
+  font-weight: bold;
+  font-size: 35px;
+  padding-left: 1rem;
+  }
+  
+  .title-preview {
+    border: 2px solid red;
+    border-radius: 15px;
+    text-decoration: underline;
+  }
+  
+  .border-shadow {
+    border: 1px solid rgba(185, 178, 178, 0.5);
+    width: 25px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .title-preview>div mat-icon {
+    height: 25px;
+    width: 25px;
+  }
+  
+  .div-select-video {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .div-select-video>button {
+    margin-bottom: 2rem;
+  }
+  
+  .info{
+    background-color: #fcffa9;
+  }
+  
+  .gray{
+    background-color: #dddddd;
+  }
+  

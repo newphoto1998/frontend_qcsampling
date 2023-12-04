@@ -45,6 +45,10 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
 import {MatListModule} from '@angular/material/list';
 import { HoldComponent } from './Components/hold/hold.component'
 import { MatTableModule } from '@angular/material/table';
+import { MachineDashboardComponent } from './Components/machine/machine-dashboard/machine-dashboard.component';
+import { MachineAddComponent } from './Components/machine/machine-add/machine-add.component';
+import { ProcessComponent } from './Components/process/process/process.component';
+import { ProcessDashboardComponent } from './Components/process/process-dashboard/process-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +58,11 @@ import { MatTableModule } from '@angular/material/table';
     FooterComponent,
     HomeComponent,
     LoginComponent,
-    HoldComponent
+    HoldComponent,
+    MachineDashboardComponent,
+    MachineAddComponent,
+    ProcessComponent,
+    ProcessDashboardComponent
   ],
   imports: [
     MatTableModule,

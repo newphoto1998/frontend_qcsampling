@@ -22,7 +22,10 @@ export class HeaderComponent implements OnInit {
 
     listMenu : any[] = [
       {name:'home',text:'SAMPLING',routeLink:'/home'},
-      {name:'hold',text:'งาน UNHOLD',routeLink:'/hold'}
+      {name:'hold',text:'งาน UNHOLD',routeLink:'/hold'},
+      {name:'manage',text:'เพิ่ม PROCESS',routeLink:'/process-dashboard'},
+      {name:'machine',text:'เพิ่ม MACHINE',routeLink:'/machine-dashboard'},
+      
      
     ]
 

@@ -47,6 +47,11 @@ getMainline(partno:string){
   );
 }
 
+getMachine(payload:any){
+  return this.http.post<any>(`${this.config.server_api}/api/QCSampling/getMachine`,payload);
+
+}
+
 getSubine(payload:any){
   return this.http.post<any>(`${this.config.server_api}/api/QCSampling/getSubLinePC`,payload);
 
@@ -91,6 +96,8 @@ getSamplingDataTableHold(payload:any){
 getLineProcessDataTable(payload:any){
   return this.http.post(this.config.server_api + `/api/QCSampling/getLineProcessDataTable`, payload);
 
+
+  
 }
 
 
@@ -115,10 +122,51 @@ saveQCLineProcess(payload:any){
 
 }
 
+saveProcess(payload:any,code:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/saveProcessMaster/${code}`, payload);
+
+}
+
+saveMachine(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/saveMachine`, payload);
+
+}
+
 getStatusCheckDataPicker(ym:string){
   return this.http.get(this.config.server_api + `/api/QCSampling/statusDatePicker/`+ ym,);
 
 }
+
+getWCNO(){
+  return this.http.get(`${this.config.server_api}/api/QCSampling/getWCNO/`).pipe(
+    map((response: any) =>
+      response.map((item: any) => item)
+    )
+  );
+}
+
+
+
+
+deleteQCLineProcess(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/DeleteQCLineProcess`, payload);
+
+}
+
+ProcessList(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/DataTableProcess`, payload);
+}
+
+machineList(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/DataTableMachine`, payload);
+}
+
+getProcess(payload:any){
+  return this.http.post(this.config.server_api + `/api/QCSampling/getMachineByWCNO`, payload);
+
+}
+
+
 
 }
 

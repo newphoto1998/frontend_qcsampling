@@ -1,0 +1,61 @@
+.mat-header-cell {
+    font-size: 15px;
+  }
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+  
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+  
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+  
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+  }
+
+  mat-sidenav-container {
+    height: calc(205vh - 115vh);
+}
+
+  .title {
+    font-weight: bold;
+    font-size: 35px;
+    padding-left: 1rem;
+  }
+  
+  .table-content {
+    box-shadow: 5px 0 10px rgb(179, 177, 177);
+    padding: 1.5rem;
+  }
+  th{
+  font-weight: bold;
+  color: black;
+  }
+  .ng-container{
+  margin: 0 20px;
+  }
+  
+  @media screen and (max-width: 500px) {
+  .mat-table {
+    border: 0;
+    vertical-align: middle
+  }
+  
+  .mat-table caption {
+    font-size: 1em;
+  }
+  }
+  

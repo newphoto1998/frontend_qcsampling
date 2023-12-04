@@ -1,0 +1,67 @@
+
+
+<div class="my-3"><span class="title" style="font-size: 20px;">{{TitleCore}}</span></div>
+<mat-card>
+    <form [formGroup]="coreFrmGroup" #formDirective="ngForm" (submit)="onSubmit(coreFrmGroup.value,formDirective)">
+      <mat-card-content class="p-6">
+
+            <div class="row">
+              <div class="col-3 col-sm-3">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>WC</mat-label>
+                    <input formControlName="wcno" matInput type="text" maxlength="3" required />
+                </mat-form-field>
+              </div>
+               <div class="col-6 col-sm-3">
+               
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>PARTNO</mat-label>
+                        <input formControlName="partno" matInput type="text" required />
+                    </mat-form-field>
+             
+              </div>
+
+              <div class="col-3 col-sm-3">
+             
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>CM</mat-label>
+                        <input formControlName="cm" matInput maxlength="1" type="text" required />
+                 
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-6 col-sm-3">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>PROCESS</mat-label>
+                    <input formControlName="process" matInput type="text" required />
+                </mat-form-field>
+              </div>
+
+              <div class="col-6 col-sm-3">
+                <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>POINT</mat-label>
+                    <input formControlName="point" matInput type="text" required />
+                </mat-form-field>
+              </div>
+            
+            </div>
+
+            <div class="row">
+                <div class="col-6 col-sm-3">
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>ค่าเริ่มต้น</mat-label>
+                        <input formControlName="std" matInput type="text" required />
+                    </mat-form-field>
+                </div>
+            </div>
+
+            
+        </mat-card-content>
+        <div class="d-flex justify-content-end">
+            <button type="button" (click)="onClickCancel()" class="btn btn-danger me-2">ยกเลิก</button>
+            <button  type="submit" class="btn btn-primary " [ngClass]="{'disabled': formDirective.invalid}">บันทึก</button>
+        </div>
+    </form>
+</mat-card>

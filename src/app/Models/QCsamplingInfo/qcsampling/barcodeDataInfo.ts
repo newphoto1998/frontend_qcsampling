@@ -1,5 +1,6 @@
 export class BarcodeDataInfoModule{
 
+ 
     wcno!:string;
     part_model!:string;
     part_name!:string;
@@ -8,5 +9,6 @@ export class BarcodeDataInfoModule{
     cm!:string;
     description!:string
     total!:number
+    status !: boolean
   
   }

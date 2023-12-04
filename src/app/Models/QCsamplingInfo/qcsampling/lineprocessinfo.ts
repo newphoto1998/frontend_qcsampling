@@ -10,13 +10,17 @@ export class LineProcessInfoModule{
 
 
   export class MainProcessInfoModule {
-    main_line_process !:string
+    main_process !:string
   }
 
 
   export class SubProcessInfoModule {
-    sub_line_process !:string
+    sub_process !:string
     sub_std !: string
+  }
+
+  export class Machine{
+    machine !: string
   }
 
 
